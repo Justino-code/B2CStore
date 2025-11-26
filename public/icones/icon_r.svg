@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="roundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Fundo circular -->
+  <circle cx="256" cy="256" r="256" fill="url(#roundGrad)"/>
+  
+  <!-- Ícone simplificado -->
+  <g transform="translate(156, 186)">
+    <path d="M50 40 L90 40 L110 80 L190 80 L210 40 L90 40 Z" 
+          fill="white" 
+          stroke="white" 
+          stroke-width="6"
+          stroke-linejoin="round"/>
+    
+    <circle cx="70" cy="100" r="15" fill="white" opacity="0.9"/>
+    <circle cx="170" cy="100" r="15" fill="white" opacity="0.9"/>
+    
+    <!-- Item destacado -->
+    <circle cx="120" cy="60" r="12" fill="white" opacity="0.8"/>
+  </g>
+</svg>
