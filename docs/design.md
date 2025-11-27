@@ -1,6 +1,3 @@
-Perfeito! Vamos criar um **design system completo e detalhado** para o B2CStore, incluindo **todas as telas e componentes** que um B2C deve ter, com suporte a **dark/light mode**, pronto para um trabalho escolar bem elaborado. Aqui está um Markdown completo:
-
-````{"variant":"standard","id":"89380"}
 # Design System e Wireframes do B2CStore
 
 O **B2CStore** será uma loja online completa no modelo B2C, com **suporte total a modos Dark e Light**, responsividade, design moderno e consistente. Este documento detalha **todos os componentes, telas e padrões** que serão usados.
