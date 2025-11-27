@@ -7,15 +7,15 @@
 * [Funcionalidades Detalhadas](docs/funcionalidades.md)
   Explica cada tela, interações, botões e validações, tanto para usuário quanto para administrador.
 
-* [Modelo de Dados](docs/modelo_dados.md)
+* [Modelo de Dados](docs/modelo_de_dados.md)
   Estrutura do banco de dados, tabelas, campos, relacionamentos e exemplos de uso.
   
-* [Fluxo de Uso](docs/fluxo-de-uso.md)
+* [Fluxo de Uso](docs/fluxo_de_uso.md)
 
-* [Tecnologias Utilizadas](docs/tecnologias.md)
+* [Tecnologias Utilizadas](docs/tecnologias_utilizadas.md)
   Lista detalhada das tecnologias e bibliotecas usadas no projeto.
 
-* [Instalação e Configuração](docs/instalacao_config.md)
+* [Instalação e Configuração](docs/instalacao_configuracao.md)
   Passo a passo para configurar o ambiente, instalar dependências PHP/NPM e iniciar o projeto.
 
 * [Licença](#licença)
