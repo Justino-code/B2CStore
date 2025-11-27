@@ -23,7 +23,7 @@ Esta seção lista todas as tecnologias, frameworks e ferramentas usadas no proj
 
 ## **3. Banco de Dados**
 
-* **MySQL ou SQLite:** Armazenamento de dados do sistema.
+* **MySQL:** Armazenamento de dados do sistema.
 * **Migrations do Laravel:** Para criação e atualização das tabelas de forma automatizada.
 * **Seeders:** Para popular dados iniciais (produtos, categorias, usuários de teste).
 

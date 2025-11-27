@@ -7,8 +7,8 @@ Este guia fornece instruções completas para configurar o projeto **Loja B2C Es
 ## **1. Clonar o Repositório**
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
-cd nome-do-projeto
+git clone https://github.com/Justino-code/B2CStore.git
+cd B2CStore
 ```
 
 ---
