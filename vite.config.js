@@ -10,4 +10,11 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    server: {
+        watch: {
+            // Ignora a pasta 'vendor' e qualquer outra que não precisa de watch
+            ignored: ['**/vendor/**', '**/node_modules/**'],
+        },
+    },
 });
+

@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('produto_imagens', function (Blueprint $table) {
             $table->id('id_imagem');
-            $table->foreignId('id_produto')->constrained('produtos', 'id_produto')->onDelete('cascade');
+            $table->unsignedBigInteger('id_produto');
+            $table->foreign('id_produto')->references('id_produto')->on('produtos')->onDelete('cascade');
             $table->string('url_imagem');
             $table->integer('ordem')->default(0);
             $table->boolean('principal')->default(false);

@@ -10,8 +10,10 @@ return new class extends Migration
     {
         Schema::create('carrinho_itens', function (Blueprint $table) {
             $table->id('id_item_carrinho');
-            $table->foreignId('id_carrinho')->constrained('carrinhos', 'id_carrinho')->onDelete('cascade');
-            $table->foreignId('id_produto')->constrained('produtos', 'id_produto');
+            $table->unsignedBigInteger('id_carrinho');
+            $table->unsignedBigInteger('id_produto');
+            $table->foreign('id_carrinho')->references('id_carrinho')->on('carrinhos')->onDelete('cascade');
+            $table->foreign('id_produto')->references('id_produto')->on('produtos')->onDelete('cascade');
             $table->integer('quantidade');
             $table->decimal('preco_unitario', 10, 2);
             $table->timestamps();

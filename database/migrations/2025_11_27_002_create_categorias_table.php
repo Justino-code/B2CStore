@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('categorias', function (Blueprint $table) {
             $table->id('id_categoria');
-            $table->string('nome', 100);
+            $table->string('nome', 100)->unique();
             $table->text('descricao')->nullable();
             $table->string('imagem_url')->nullable();
             $table->integer('ordem')->default(0);

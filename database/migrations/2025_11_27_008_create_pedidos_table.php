@@ -10,8 +10,10 @@ return new class extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id('id_pedido');
-            $table->foreignId('id_usuario')->constrained('usuarios', 'id_usuario');
-            $table->foreignId('id_cupom')->nullable()->constrained('cupons', 'id_cupom');
+            $table->unsignedBigInteger('id_usuario');
+            $table->unsignedBigInteger('id_cupom')->nullable();
+            $table->foreign('id_usuario')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+            $table->foreign('id_cupom')->nullable()->references('id_cupom')->on('cupons')->onDelete('set null');
             $table->string('codigo_pedido', 20)->unique();
             $table->decimal('total', 10, 2);
             $table->decimal('custo_envio', 8, 2)->default(0.00);
