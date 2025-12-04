@@ -1,0 +1,20 @@
+name: PR Approval Check
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, synchronize]
+
+jobs:
+  check-leader-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar label de aprovação do líder
+        if: "!contains(github.event.pull_request.labels.*.name, 'approved-by-leader')"
+        run: |
+          echo "❌ Este PR não tem a label 'approved-by-leader'. Merge bloqueado."
+          exit 1
+      - name: PR aprovado pelo líder
+        if: "contains(github.event.pull_request.labels.*.name, 'approved-by-leader')"
+        run: |
+          echo "✅ PR aprovado pelo líder. Merge permitido."
+
