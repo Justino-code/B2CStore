@@ -2,9 +2,34 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function(){
+use App\Livewire\Public\{
+    Index as Home,
+    Produtos as CatalogoProdutos,
+    ProdutoShow,
+};
+
+use App\Livewire\Carrinho\{
+    Index as CarrinhoIndex,
+};
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', Home::class)->name('home');
+
+Route::get('/produtos', CatalogoProdutos::class)->name('produtos');
+
+Route::get('/produto/{id}', ProdutoShow::class)->name('produto.show');
+
+Route::get('/carrinho', CarrinhoIndex::class)->name('carrinho');
+
+
+/*Route::get('/', function(){
     return view('pages.home');
-})->name('home');
+})->name('home');*/
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
