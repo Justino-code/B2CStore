@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
@@ -8,12 +7,13 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
         }),
-        tailwindcss(),
     ],
     server: {
         watch: {
-            // Ignora a pasta 'vendor' e qualquer outra que não precisa de watch
+            // Ignora pastas pesadas para não criar watchers desnecessários
             ignored: ['**/vendor/**', '**/node_modules/**'],
+            // Usa polling caso o limite de watchers seja atingido
+            usePolling: true,
         },
     },
 });
