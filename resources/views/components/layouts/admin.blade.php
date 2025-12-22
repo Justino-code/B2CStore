@@ -4,7 +4,7 @@
         <aside class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:dark:bg-gray-800 lg:dark:border-gray-700 transition-colors duration-300">
             <!-- Logo -->
             <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-200 dark:border-gray-700">
-                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <a href="{{ route('dashboard') }}" class="text-xl font-bold text-blue-600 dark:text-blue-400">
                     B2CStore Admin
                 </a>
             </div>

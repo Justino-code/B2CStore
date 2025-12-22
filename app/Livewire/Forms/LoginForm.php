@@ -36,6 +36,8 @@ class LoginForm extends Form
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),
             ]);
+
+            $this->dispatch('error', message: "Erro nao fazer login");
         }
 
         RateLimiter::clear($this->throttleKey());

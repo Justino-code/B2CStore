@@ -31,12 +31,16 @@ Route::get('/carrinho', CarrinhoIndex::class)->name('carrinho');
     return view('pages.home');
 })->name('home');*/
 
-Route::view('dashboard', 'dashboard')
+//
+Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+
+/*Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
-
+ */
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
 
 require __DIR__.'/auth.php';
