@@ -26,6 +26,13 @@ Route::get('/produto/{id}', ProdutoShow::class)->name('produto.show');
 
 Route::get('/carrinho', CarrinhoIndex::class)->name('carrinho');
 
+Route::get('/categoria', function(){})->name('categoria');
+Route::get('/categorias', function(){})->name('categorias');
+Route::get('/destaques', function(){})->name('produtos.destaque');
+Route::get('/detalhes', function(){})->name('produto.detalhe');
+Route::get('/promocao', function(){})->name('produtos.promocao');
+Route::get('/novidades', function(){})->name('produtos.novidade');
+
 
 /*Route::get('/', function(){
     return view('pages.home');

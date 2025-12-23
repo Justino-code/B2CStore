@@ -11,9 +11,11 @@ Alpine.plugin(persist);
 // Importar configurações
 import './config/theme';
 import './config/notifications';
+import './config/swiper';
 
 // Importar outras bibliotecas
 import './lib/chartjs';
+import './lib/swiper'; 
 
 // Importar serviços
 import './services/themeService';
