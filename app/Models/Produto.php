@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Produto extends Model
 {
@@ -18,6 +19,7 @@ class Produto extends Model
 
     protected $fillable = [
         'id_categoria',
+         'id_marca',
         'nome',
         'descricao',
         'preco',
@@ -44,6 +46,11 @@ class Produto extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'id_categoria', 'id_categoria');
+    }
+
+    public function marca()
+    {
+        return $this->belongsTo(Marca::class, 'id_marca');
     }
 
     public function imagens()
@@ -137,5 +144,18 @@ class Produto extends Model
         return $query->where('nome', 'LIKE', "%{$termo}%")
                     ->orWhere('descricao', 'LIKE', "%{$termo}%")
                     ->orWhere('sku', 'LIKE', "%{$termo}%");
+    }
+
+     public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($produto) {
+            if (!$produto->slug) {
+                $slug = Str::slug($produto->nome, '-');
+                $slug = $slug . '-' . uniqid(); 
+                $produto->slug = $slug;
+            }
+        });
     }
 }

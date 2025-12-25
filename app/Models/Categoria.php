@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Categoria extends Model
 {
@@ -19,6 +20,7 @@ class Categoria extends Model
         'nome',
         'descricao',
         'imagem_url',
+        'slug',
         'ordem',
         'ativo'
     ];
@@ -27,7 +29,7 @@ class Categoria extends Model
         'ativo' => 'boolean',
     ];
 
-    // Adicionar validação para garantir nome único
+    // Adicionar validação para garantir nome único e um slug
     public static function boot()
     {
         parent::boot();
@@ -40,6 +42,12 @@ class Categoria extends Model
 
             if ($existente) {
                 throw new \Exception("Já existe uma categoria com o nome '{$categoria->nome}'");
+            }
+
+            if (!$categoria->slug) {
+                $slug = Str::slug($categoria->nome, '-');
+                $slug = $slug . '-' . uniqid(); 
+                $categoria->slug = $slug;
             }
         });
     }

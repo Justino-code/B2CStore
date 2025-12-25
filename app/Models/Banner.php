@@ -5,9 +5,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Banner extends Model
 {
+    use HasFactory;
     protected $primaryKey = 'id_banner';
     protected $table = 'banners';
     

@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('nome', 100)->unique();
             $table->text('descricao')->nullable();
             $table->string('imagem_url')->nullable();
+            $table->string('slug', 255)->unique();
             $table->integer('ordem')->default(0);
             $table->boolean('ativo')->default(true);
             $table->timestamps();

@@ -2,9 +2,13 @@
 namespace App\Livewire\Public;
 
 use Livewire\Component;
-use App\Models\Categoria;
-use App\Models\Produto;
-use App\Models\Banner;
+use App\Models\{
+    Categoria,
+    Produto,
+    Banner,
+    Review,
+    Usuario,
+};
 use Illuminate\Support\Facades\Cache;
 
 class Index extends Component
@@ -28,6 +32,36 @@ class Index extends Component
                 message: 'Faça login para adicionar aos favoritos!'
             );
         }
+    }
+
+    public function clientesSatisfeitos(){
+        $totalClientes = Usuario::where('role', 'cliente')->count();
+        $totalReviews = Review::count();
+
+        $reviewsPositivas = Review::where('rating', '>=', 3)->count();
+
+        if ($totalReviews > 0) {
+            $taxaSatisfacao = $reviewsPositivas / $totalReviews;
+        } else {
+            $taxaSatisfacao = 0;
+        }
+        
+        $clientesSatisfeitosEstimados = $totalClientes * $taxaSatisfacao;
+
+        return $clientesSatisfeitosEstimados;
+    }
+
+    public function estrelas(){
+        $totalReviews = Review::count();
+        
+        if ($totalReviews > 0) {
+            $mediaEstrelas = Review::avg('rating');
+        } else {
+            $mediaEstrelas = 0;
+        }
+
+        return $mediaEstrelas;
+
     }
 
     public function render()
@@ -64,6 +98,9 @@ class Index extends Component
                     ->orderBy('created_at', 'desc')
                     ->limit(8)
                     ->get(),
+                
+                'clientesSatisfeitos' => $this->clientesSatisfeitos(),
+                'estrelas' => $this->estrelas(),
             ];
         });
 

@@ -6,6 +6,10 @@ use App\Livewire\Public\{
     Index as Home,
     Produtos as CatalogoProdutos,
     ProdutoShow,
+    CategoriasIndex,
+    CategoriaShow,
+    Sobre,
+
 };
 
 use App\Livewire\Carrinho\{
@@ -22,12 +26,18 @@ Route::get('/', Home::class)->name('home');
 
 Route::get('/produtos', CatalogoProdutos::class)->name('produtos');
 
-Route::get('/produto/{id}', ProdutoShow::class)->name('produto.show');
+Route::get('/produto/{slug}', ProdutoShow::class)->name('produto.detalhe');
+
+
+Route::get('/categorias', CategoriasIndex::class)->name('categorias');
+Route::get('/categoria/{slug}', CategoriaShow::class)->name('categoria');
+
+Route::get('/sobre', Sobre::class)->name('sobre');
+Route::get('/contato', Sobre::class)->name('contato');
+
 
 Route::get('/carrinho', CarrinhoIndex::class)->name('carrinho');
 
-Route::get('/categoria', function(){})->name('categoria');
-Route::get('/categorias', function(){})->name('categorias');
 Route::get('/destaques', function(){})->name('produtos.destaque');
 Route::get('/detalhes', function(){})->name('produto.detalhe');
 Route::get('/promocao', function(){})->name('produtos.promocao');

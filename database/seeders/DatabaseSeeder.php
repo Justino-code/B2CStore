@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call(CategoriaSeeder::class);
         $this->command->line('');
 
+        $this->call(MarcaSeeder::class);
+        $this->call(BannerSeeder::class);
+
         // 2. Criar administrador principal
         $this->command->info('👑 Criando administrador...');
         $this->call(AdminSeeder::class);

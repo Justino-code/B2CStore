@@ -9,51 +9,237 @@
 x-init="init()"
 wire:ignore>
     
-    <!-- ========== HERO BANNER ========== -->
-    <section class="relative overflow-hidden">
-        <div class="swiper-container h-[400px] md:h-[500px]">
+    <!-- ========== HERO BANNER MODERNO E ELEGANTE ========== -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <!-- Background Effects -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
+            
+            <!-- Animated Orbs -->
+            <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-cyan-500/20 rounded-full animate-ping opacity-20"></div>
+            <div class="absolute bottom-1/3 right-1/3 w-24 h-24 bg-purple-500/20 rounded-full animate-ping opacity-20 delay-500"></div>
+            
+            <!-- Grid Pattern -->
+            <div class="absolute inset-0 opacity-5" 
+                 style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), 
+                        linear-gradient(to bottom, #ffffff 1px, transparent 1px);
+                        background-size: 40px 40px;"></div>
+        </div>
+
+        <!-- Swiper Container -->
+        <div class="swiper-container h-[500px] md:h-[600px] lg:h-[700px] relative">
             <div class="swiper-wrapper">
-                @foreach($banners as $banner)
-                <div class="swiper-slide relative">
-                    @if($banner->imagem)
-                    <img src="{{ asset('storage/' . $banner->imagem) }}" 
-                         alt="{{ $banner->titulo }}"
-                         class="w-full h-full object-cover"
-                         loading="lazy">
-                    @else
-                    <div class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
-                    @endif
-                    
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center">
-                        <div class="container mx-auto px-4 md:px-8">
-                            <div class="max-w-xl text-white">
-                                <h1 class="text-3xl md:text-4xl font-bold mb-3 animate__animated animate__fadeInUp">
-                                    {{ $banner->titulo }}
-                                </h1>
-                                <p class="text-base md:text-lg mb-4 animate__animated animate__fadeInUp animate__delay-1s">
-                                    {{ $banner->subtitulo }}
-                                </p>
-                                @if($banner->link)
-                                <a href="{{ $banner->link }}"
-                                   class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 transform hover:-translate-y-1 animate__animated animate__fadeInUp animate__delay-2s">
-                                    {{ $banner->texto_botao ?? 'Comprar Agora' }}
-                                    <i class="fas fa-arrow-right ml-2"></i>
-                                </a>
-                                @endif
+                @forelse($banners as $banner)
+                    <div class="swiper-slide relative">
+                        <!-- Background Image with Parallax Effect -->
+                        <div class="absolute inset-0 overflow-hidden">
+                            @if($banner->imagem)
+                                <img
+                                    src="{{ image_url($banner->imagem) }}"
+                                    alt="{{ $banner->titulo }}"
+                                    class="w-full h-full object-cover swiper-parallax"
+                                    data-swiper-parallax="-30%"
+                                    data-swiper-parallax-duration="800"
+                                    loading="lazy"
+                                />
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900"></div>
+                            @endif
+                            
+                            <!-- Gradient Overlays -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40"></div>
+                        </div>
+
+                        <!-- Content Container -->
+                        <div class="relative h-full flex items-center">
+                            <div class="container mx-auto px-4 md:px-8 lg:px-12">
+                                <div class="max-w-2xl lg:max-w-3xl">
+                                    <!-- Badge -->
+                                    <div class="inline-flex items-center gap-2 mb-6 md:mb-8 swiper-parallax"
+                                         data-swiper-parallax="-100"
+                                         data-swiper-parallax-duration="600">
+                                        <span class="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold rounded-full shadow-lg">
+                                            <i class="fas fa-bolt mr-2 animate-pulse"></i>Destaque
+                                        </span>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight swiper-parallax"
+                                        data-swiper-parallax="-200"
+                                        data-swiper-parallax-duration="800">
+                                        <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
+                                            {{ $banner->titulo }}
+                                        </span>
+                                    </h1>
+
+                                    <!-- Subtitle -->
+                                    <p class="text-lg md:text-xl lg:text-2xl text-white/90 mb-8 md:mb-10 leading-relaxed max-w-xl swiper-parallax"
+                                       data-swiper-parallax="-150"
+                                       data-swiper-parallax-duration="1000">
+                                        {{ $banner->subtitulo }}
+                                    </p>
+
+                                    <!-- CTA Button -->
+                                    @if($banner->link)
+                                        <div class="flex flex-col sm:flex-row gap-4 swiper-parallax"
+                                             data-swiper-parallax="-50"
+                                             data-swiper-parallax-duration="1200">
+                                            <a href="{{ $banner->link }}"
+                                               class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30 inline-flex items-center justify-center gap-3 overflow-hidden">
+                                                <!-- Button Shine Effect -->
+                                                <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
+                                                
+                                                <span>{{ $banner->texto_botao ?? 'Saiba Mais' }}</span>
+                                                <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+
+                                   
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide Number -->
+                        <div class="absolute bottom-8 right-8 z-10">
+                            <div class="text-white/60 text-sm font-mono">
+                                <span class="text-2xl font-bold text-white">{{ $loop->iteration }}</span>
+                                <span class="mx-2">/</span>
+                                <span>{{ $banners->count() }}</span>
                             </div>
                         </div>
                     </div>
-                </div>
-                @endforeach
+                @empty
+                    <!-- Default Slide -->
+                    <div class="swiper-slide relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900">
+                            <!-- Animated Background -->
+                            <div class="absolute inset-0 opacity-20"
+                                 style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.4\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                            
+                            <!-- Floating Elements -->
+                            <div class="absolute top-20 left-20 w-48 h-48 bg-white/5 rounded-full animate-float"></div>
+                            <div class="absolute bottom-20 right-20 w-64 h-64 bg-white/5 rounded-full animate-float delay-1000"></div>
+                        </div>
+
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+
+                        <!-- Content -->
+                        <div class="relative h-full flex items-center">
+                            <div class="container mx-auto px-4 md:px-8">
+                                <div class="max-w-3xl">
+                                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                                        <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
+                                            Bem-vindo à <br><span class="text-white">B2CStore</span>
+                                        </span>
+                                    </h1>
+                                    <p class="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl leading-relaxed">
+                                        Descubra uma experiência de compra única com produtos selecionados, 
+                                        qualidade premium e atendimento excepcional.
+                                    </p>
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <a href="{{ route('produtos') }}"
+                                           class="group px-10 py-5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30 inline-flex items-center justify-center gap-3 overflow-hidden">
+                                            <!-- Shine Effect -->
+                                            <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
+                                            
+                                            <i class="fas fa-gem text-lg"></i>
+                                            <span>Explorar Produtos</span>
+                                            <i class="fas fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
-            
-            <!-- Navigation Buttons -->
-            <div class="swiper-button-next text-white mr-4 md:mr-8"></div>
-            <div class="swiper-button-prev text-white ml-4 md:ml-8"></div>
-            
-            <!-- Pagination -->
-            <div class="swiper-pagination"></div>
+
+            <!-- Navigation -->
+            @if($banners->count() > 1)
+                <div class="swiper-button-next !text-white !w-14 !h-14 !rounded-full !bg-white/10 !backdrop-blur-sm !border !border-white/20 hover:!bg-white/20 hover:!scale-110 transition-all duration-300 mr-4 md:mr-8">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="swiper-button-prev !text-white !w-14 !h-14 !rounded-full !bg-white/10 !backdrop-blur-sm !border !border-white/20 hover:!bg-white/20 hover:!scale-110 transition-all duration-300 ml-4 md:ml-8">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="swiper-pagination !bottom-8">
+                    <span class="swiper-pagination-bullet !bg-white/50 !opacity-50 hover:!opacity-100 transition-opacity"></span>
+                    <span class="swiper-pagination-bullet-active !bg-gradient-to-r !from-blue-500 !to-cyan-500 !opacity-100"></span>
+                </div>
+            @endif
+
+            <!-- Autoplay Progress Bar -->
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-20">
+                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 swiper-progress-bar" 
+                     style="transition: width 5s linear;"></div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-8 left-8 z-20 hidden md:block">
+                <div class="flex flex-col items-center text-white/60 text-sm animate-bounce">
+                    <span class="mb-2 text-xs uppercase tracking-wider">Scroll</span>
+                    <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+                        <div class="w-1 h-3 bg-white/60 rounded-full mt-2"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+      <!-- Social Proof Banner -->
+<div class="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-r from-black/50 to-transparent backdrop-blur-sm">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex items-center justify-between text-white/80 text-sm">
+
+            <!-- Clientes satisfeitos -->
+            <div class="flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-400"></i>
+                <span>
+                    +{{ number_format($clientesSatisfeitos, 0, ',', '.') }}
+                    clientes satisfeitos
+                </span>
+            </div>
+
+            <!-- Estrelas + Entrega -->
+            <div class="hidden md:flex items-center gap-4">
+
+                <!-- Avaliação média -->
+                <div class="flex items-center gap-2">
+                    <div class="flex">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= floor($estrelas))
+                                <i class="fas fa-star text-yellow-400 text-xs"></i>
+                            @elseif ($i - $estrelas < 1)
+                                <i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>
+                            @else
+                                <i class="far fa-star text-yellow-400 text-xs"></i>
+                            @endif
+                        @endfor
+                    </div>
+
+                    <span>
+                        {{ number_format($estrelas, 1) }}/5
+                    </span>
+                </div>
+
+                <!-- Separador -->
+                <div class="w-px h-4 bg-white/30"></div>
+
+                <!-- Entrega -->
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-shipping-fast text-blue-400"></i>
+                    <span>Entrega em 24h</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
     </section>
 
     <!-- ========== CATEGORIAS DESTAQUE ========== -->
@@ -238,7 +424,7 @@ wire:ignore>
                         <i class="fas fa-shipping-fast text-blue-600 dark:text-blue-400 text-xl md:text-2xl"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 dark:text-white mb-1 md:mb-2 text-base md:text-lg">Entrega Rápida</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm md:text-base">Entrega em até 48h para SP e RJ</p>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm md:text-base">Entrega em até 48h</p>
                 </div>
                 
                 <div class="text-center">
@@ -268,3 +454,41 @@ wire:ignore>
         </div>
     </section>
 </div>
+
+@push('styles')
+<style>
+    /* Animação personalizada para elementos flutuantes */
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) translateX(0px);
+        }
+        33% {
+            transform: translateY(-20px) translateX(10px);
+        }
+        66% {
+            transform: translateY(10px) translateX(-10px);
+        }
+    }
+    
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .delay-1000 {
+        animation-delay: 1s;
+    }
+    
+    .delay-500 {
+        animation-delay: 0.5s;
+    }
+    
+    /* Estilos personalizados para Swiper */
+    .swiper-progress-bar {
+        width: 0%;
+    }
+    
+    .swiper-slide-active .swiper-progress-bar {
+        width: 100%;
+    }
+</style>
+@endpush

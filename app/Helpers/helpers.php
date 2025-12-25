@@ -11,13 +11,18 @@ if (!function_exists('calculateDiscountPercentage')) {
     }
 }
 
-// app/Helpers/helpers.php
-
 if (! function_exists('image_url')) {
-    function image_url(?string $path): string
+    /**
+     * Retorna a URL de uma imagem ou null se não existir.
+     *
+     * @param string|null $path
+     * @param bool $placeholder - se true, retorna placeholder caso não exista
+     * @return string|null
+     */
+    function image_url(?string $path, bool $placeholder = false): ?string
     {
         if (! $path) {
-            return asset('images/placeholder.png');
+            return $placeholder ? asset('images/placeholder.png') : null;
         }
 
         // Se já for URL externa
@@ -25,10 +30,19 @@ if (! function_exists('image_url')) {
             return $path;
         }
 
-        // Caso seja imagem local
+        // Caminho completo no storage
+        $storagePath = storage_path('app/public/' . ltrim($path, '/'));
+
+        // Verifica se o arquivo existe no storage
+        if (! file_exists($storagePath)) {
+            return $placeholder ? asset('images/placeholder.png') : null;
+        }
+
+        // Retorna a URL acessível publicamente
         return asset('storage/' . ltrim($path, '/'));
     }
 }
+
 
 if (! function_exists('format_kwanza')) {
     function format_kwanza(float|int $value): string

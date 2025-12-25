@@ -29,10 +29,13 @@ class CategoriaFactory extends Factory
         $baseNome = $this->faker->randomElement($this->categoriasBase);
         $nome = $baseNome . ' ' . Str::random(4) . ' ' . time();
 
+        $slug = Str::slug($nome) . '-' . uniqid();
+
         return [
             'nome' => $nome,
             'descricao' => $this->faker->paragraph(),
             'imagem_url' => $this->faker->imageUrl(400, 300, 'education'),
+            'slug' => $slug,
             'ordem' => $this->faker->numberBetween(1, 100),
             'ativo' => $this->faker->boolean(90),
         ];
