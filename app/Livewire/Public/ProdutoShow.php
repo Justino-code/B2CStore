@@ -4,10 +4,14 @@
 namespace App\Livewire\Public;
 
 use Livewire\Component;
-use App\Models\Produto;
-use App\Models\Review;
+use App\Models\{
+    Produto,
+    Review
+};
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
+
+use Illuminate\Support\Facades\DB;
 
 #[Layout('components.layouts.public')]
 class ProdutoShow extends Component
@@ -65,7 +69,7 @@ class ProdutoShow extends Component
         
         $this->reviews = Cache::remember($cacheKey, 300, function () {
             return Review::with(['usuario' => function($query) {
-                    $query->select('id_usuario', 'nome', 'email', 'avatar_url');
+                    $query->select('id_usuario', 'nome', 'email', 'avatar_url', DB::raw('email_verificado_em as verificado'));
                 }])
                 ->where('id_produto', $this->produto->id_produto)
                 ->where('aprovado', true)

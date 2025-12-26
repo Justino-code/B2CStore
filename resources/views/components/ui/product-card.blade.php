@@ -11,10 +11,11 @@
             border border-gray-200/30 dark:border-gray-700/30 hover:border-blue-300/20 dark:hover:border-blue-500/20
             before:absolute before:inset-0 before:bg-gradient-to-br before:from-blue-500/0 before:via-indigo-500/0 before:to-purple-500/0
             before:group-hover:from-blue-500/5 before:group-hover:via-indigo-500/3 before:group-hover:to-purple-500/5
-            before:transition-all before:duration-700"
+            before:transition-all before:duration-700 cursor-pointer"
      x-data="{ showActions: false }"
      @mouseenter="showActions = true"
-     @mouseleave="showActions = false">
+     @mouseleave="showActions = false"
+     onclick="window.location.href='{{ route('produto.detalhe', $produto->slug) }}'">
 
     {{-- Efeito de brilho sutil --}}
     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 
@@ -27,7 +28,8 @@
             <div class="relative">
                 <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full blur opacity-70"></div>
                 <span class="relative px-3 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white 
-                           text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5">
+                           text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5"
+                      onclick="event.stopPropagation();">
                     <i class="fas fa-bolt text-xs"></i>
                     -{{ $desconto }}%
                 </span>
@@ -38,7 +40,8 @@
             <div class="relative">
                 <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full blur opacity-70"></div>
                 <span class="relative px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white 
-                           text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5">
+                           text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5"
+                      onclick="event.stopPropagation();">
                     <i class="fas fa-sparkles text-xs"></i>
                     NOVO
                 </span>
@@ -48,27 +51,26 @@
 
     {{-- Container da imagem --}}
     <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-        <a href="{{ route('produto.detalhe', $produto->slug) }}" class="block">
+        {{-- Imagem --}}
+        <div class="relative aspect-square overflow-hidden">
             @if($imagem)
-                <div class="relative aspect-square overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-50/10 to-indigo-100/5 
-                                dark:from-blue-900/10 dark:to-indigo-900/5"></div>
-                    <img src="{{ image_url($imagem) }}"
-                         alt="{{ $produto->nome }}"
-                         loading="lazy"
-                         decoding="async"
-                         class="w-full h-full object-cover transition-all duration-1000 
-                                group-hover:scale-110 group-hover:rotate-1">
-                </div>
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-50/10 to-indigo-100/5 
+                            dark:from-blue-900/10 dark:to-indigo-900/5"></div>
+                <img src="{{ image_url($imagem) }}"
+                     alt="{{ $produto->nome }}"
+                     loading="lazy"
+                     decoding="async"
+                     class="w-full h-full object-cover transition-all duration-1000 
+                            group-hover:scale-110 group-hover:rotate-1">
             @else
-                <div class="aspect-square flex items-center justify-center">
+                <div class="w-full h-full flex items-center justify-center">
                     <div class="relative">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-500/20 rounded-full blur-xl"></div>
                         <i class="fas fa-cube text-gray-300 dark:text-gray-600 text-5xl relative z-10"></i>
                     </div>
                 </div>
             @endif
-        </a>
+        </div>
 
         {{-- Overlay escuro para ações --}}
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 
@@ -81,7 +83,8 @@
             
             {{-- Botão Visualização Rápida --}}
             <button @click="$dispatch('quick-view', { id: {{ $produto->id_produto }} })"
-                    class="relative group/quickview overflow-hidden">
+                    class="relative group/quickview overflow-hidden z-20"
+                    onclick="event.stopPropagation();">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-0 
                             group-hover/quickview:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center 
@@ -102,7 +105,8 @@
             @if($produto->estoque > 0)
                 <button wire:click="addToCart({{ $produto->id_produto }})"
                         wire:loading.attr="disabled"
-                        class="relative group/cart overflow-hidden">
+                        class="relative group/cart overflow-hidden z-20"
+                        onclick="event.stopPropagation();">
                     <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-0 
                                 group-hover/cart:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative w-14 h-14 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 
@@ -127,7 +131,8 @@
 
             {{-- Botão Favorito --}}
             <button wire:click="addToFavorites({{ $produto->id_produto }})"
-                    class="relative group/fav overflow-hidden">
+                    class="relative group/fav overflow-hidden z-20"
+                    onclick="event.stopPropagation();">
                 <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl blur opacity-0 
                             group-hover/fav:opacity-100 transition-opacity duration-300"></div>
                 <div class="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center 
@@ -148,22 +153,24 @@
 
         {{-- Status estoque --}}
         @if($produto->estoque <= 0)
-            <div class="absolute bottom-4 right-4">
+            <div class="absolute bottom-4 right-4 z-10">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full blur opacity-50"></div>
                     <span class="relative px-3 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white 
-                               text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5">
+                               text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5"
+                          onclick="event.stopPropagation();">
                         <i class="fas fa-times-circle text-xs"></i>
                         ESGOTADO
                     </span>
                 </div>
             </div>
         @elseif($produto->estoque <= 5)
-            <div class="absolute bottom-4 right-4">
+            <div class="absolute bottom-4 right-4 z-10">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full blur opacity-50"></div>
                     <span class="relative px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white 
-                               text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
+                               text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5 animate-pulse"
+                          onclick="event.stopPropagation();">
                         <i class="fas fa-fire text-xs"></i>
                         ÚLTIMAS {{ $produto->estoque }}
                     </span>
@@ -175,26 +182,28 @@
     {{-- Conteúdo do produto --}}
     <div class="p-6">
         {{-- Categoria --}}
-        <a href="{{ route('categoria', $produto->categoria->slug) }}"
-           class="inline-flex items-center text-xs font-medium text-gray-500 dark:text-gray-400
-                  hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-3 group/category">
-            <div class="mr-2 p-1.5 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/10 rounded-lg">
+        <div class="inline-flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 group/category">
+            <div class="mr-2 p-1.5 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/10 rounded-lg"
+                 onclick="event.stopPropagation();">
                 <i class="fas fa-tag text-blue-500 dark:text-blue-400 text-xs"></i>
             </div>
-            <span>{{ $produto->categoria->nome }}</span>
-            <i class="fas fa-arrow-right ml-1.5 text-xs opacity-0 group-hover/category:opacity-100 
-                      group-hover/category:translate-x-0.5 transition-all duration-300"></i>
-        </a>
+            <a href="{{ route('categoria', $produto->categoria->slug) }}" 
+               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+               onclick="event.stopPropagation();">
+                <span>{{ $produto->categoria->nome }}</span>
+                <i class="fas fa-arrow-right ml-1.5 text-xs opacity-0 group-hover/category:opacity-100 
+                          group-hover/category:translate-x-0.5 transition-all duration-300"></i>
+            </a>
+        </div>
 
         {{-- Nome do produto --}}
-        <h3 class="mb-4">
-            <a href="{{ route('produto.detalhe', $produto->slug) }}"
-               class="text-lg font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 
-                      transition-colors duration-300 line-clamp-2 group/title inline-flex items-start">
+        <h3 class="mb-4 group/title">
+            <span class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 
+                      transition-colors duration-300 line-clamp-2 inline-flex items-start">
                 {{ $produto->nome }}
                 <i class="fas fa-external-link-alt ml-2 text-sm text-gray-400 group-hover/title:text-blue-500 
                           opacity-0 group-hover/title:opacity-100 transition-all duration-300 mt-1"></i>
-            </a>
+            </span>
         </h3>
 
         {{-- Rating --}}
@@ -269,19 +278,6 @@
                 </div>
             @endif
         </div>
-
-        {{-- Entrega estimada --}}
-        {{--
-        <div class="mt-4 pt-3 border-t border-gray-200/30 dark:border-gray-700/30">
-            <div class="flex items-center justify-between text-sm">
-                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-shipping-fast text-blue-500"></i>
-                    <span>Entrega:</span>
-                </div>
-                <span class="font-medium text-gray-900 dark:text-white">2-3 dias</span>
-            </div>
-        </div>
-        --}}
     </div>
 
     {{-- Efeito de borda luminosa --}}
@@ -322,6 +318,11 @@
     
     .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    /* Cursor pointer para indicar que é clicável */
+    .cursor-pointer {
+        cursor: pointer;
     }
 </style>
 @endpush

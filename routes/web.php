@@ -16,6 +16,10 @@ use App\Livewire\Carrinho\{
     Index as CarrinhoIndex,
 };
 
+use  \App\Livewire\Admin\{
+    Dashboard
+};
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -43,13 +47,17 @@ Route::get('/detalhes', function(){})->name('produto.detalhe');
 Route::get('/promocao', function(){})->name('produtos.promocao');
 Route::get('/novidades', function(){})->name('produtos.novidade');
 
+Route::get('/termos', function(){})->name('terms');
+Route::get('/privacidade', function(){})->name('privacy');
 
-/*Route::get('/', function(){
+
+Route::get('/test', function(){
     return view('pages.home');
-})->name('home');*/
+})->name('home');
 
 //
-Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+Route::get('/dashboard', Dashboard::class)->name('dashboard');
+Route::get('/dashboard/admin', Dashboard::class)->name('admin.dashboard');
 
 /*Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

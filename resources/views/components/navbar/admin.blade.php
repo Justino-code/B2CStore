@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ route('/') }}" class="flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center">
                         <x-application-logo class="block h-8 w-auto fill-current text-gray-800 dark:text-gray-200" />
                         <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
                             B2CStore Admin
@@ -22,28 +22,28 @@
                         Dashboard
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.products.*')">
+                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.products.*')">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                         </svg>
                         Produtos
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.categories.*')">
+                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.categories.*')">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
                         Categorias
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.orders.*')">
+                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.orders.*')">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
                         Pedidos
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.users.*')">
+                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.users.*')">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-6.5a6 6 0 01-6 6"/>
                         </svg>
@@ -79,11 +79,11 @@
 
                     <div x-show="open" @click.away="open = false" x-transition
                          class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 transition-colors duration-300">
-                        <a href="{{ route('admin.profile') }}"
+                        <a href="{{ route('home') }}"
                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
                             Meu Perfil
                         </a>
-                        <a href="{{ route('admin.settings') }}"
+                        <a href="{{ route('home') }}"
                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
                             Configurações
                         </a>
@@ -117,10 +117,10 @@
     <!-- Mobile menu -->
     <div class="sm:hidden" x-show="open" @click.away="open = false" x-transition>
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.dashboard')">
+            <x-responsive-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.dashboard')">
                 Dashboard
             </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('/') }}" :active="request()->routeIs('admin.products.*')">
+            <x-responsive-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.products.*')">
                 Produtos
             </x-responsive-nav-link>
             <x-responsive-nav-link href="" :active="request()->routeIs('admin.categories.*')">
