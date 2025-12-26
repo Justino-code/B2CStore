@@ -51,7 +51,7 @@ class RegisterManager extends Component
             );
             
             // Redirecionar após registro
-            $this->redirect(route('dashboard'), navigate: true);
+            $this->redirect(route('perfil'), navigate: true);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->isLoading = false;
@@ -63,7 +63,6 @@ class RegisterManager extends Component
                 message: 'Erro ao criar conta. Tente novamente.'
             );
             $this->addError('general', 'Erro ao criar conta. Tente novamente.');
-            dd($e); 
         }
     }
 

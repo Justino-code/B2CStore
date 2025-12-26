@@ -57,6 +57,7 @@ Route::get('/test', function(){
 
 //
 Route::get('/dashboard', Dashboard::class)->name('dashboard');
+Route::get('/perfil', Dashboard::class)->name('perfil');
 Route::get('/dashboard/admin', Dashboard::class)->name('admin.dashboard');
 
 /*Route::view('dashboard', 'dashboard')

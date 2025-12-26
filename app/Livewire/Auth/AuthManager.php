@@ -52,7 +52,12 @@ class AuthManager extends Component
             );
             
             // Redirecionar após login bem-sucedido
-            $this->redirect(route('dashboard'), navigate: true);
+            if(Auth::user()->role === 'cliente'){
+                $this->redirect(route('perfil'), navigate: true);
+            
+            }else{
+                $this->redirect(route('dashboard'), navigate: true);
+            }
             
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->isLoading = false;
