@@ -11,9 +11,6 @@ class Review extends Model
 
     protected $table = 'reviews';
     protected $primaryKey = 'id_review';
-    protected $keyType = 'int';
-    public $incrementing = true;
-    public $timestamps = true;
 
     protected $fillable = [
         'id_produto',
@@ -26,8 +23,6 @@ class Review extends Model
     protected $casts = [
         'rating' => 'integer',
         'aprovado' => 'boolean',
-        'criado_em' => 'datetime',
-        'atualizado_em' => 'datetime'
     ];
 
     // Relações

@@ -6,7 +6,7 @@ use Livewire\Volt\Volt;
 use App\Livewire\Auth\AuthManager;
 use App\Livewire\Auth\RegisterManager;
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest'])->group(function () {
     // Rota de registro
     Volt::route('register', RegisterManager::class)
         ->name('register');

@@ -11,9 +11,6 @@ class Favorito extends Model
 
     protected $table = 'favoritos';
     protected $primaryKey = 'id_favorito';
-    protected $keyType = 'int';
-    public $incrementing = true;
-    public $timestamps = true;
 
     protected $fillable = [
         'id_usuario',

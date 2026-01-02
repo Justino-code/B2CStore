@@ -44,9 +44,64 @@ if (! function_exists('image_url')) {
 }
 
 
-if (! function_exists('format_kwanza')) {
-    function format_kwanza(float|int $value): string
+if (!function_exists('format_kwanza')) {
+    /**
+     * Formata um valor em Kwanza (AOA)
+     */
+    function format_kwanza($valor, $decimals = 2, $decimalSeparator = ',', $thousandsSeparator = '.', $simboly=' AOA')
     {
-        return number_format($value, 2, ',', '.') . ' Kz';
+        if (!is_numeric($valor)) {
+            return '0,00'. $simboly;
+        }
+        
+        return number_format($valor, $decimals, $decimalSeparator, $thousandsSeparator) . $simboly;
+    }
+}
+
+
+if (!function_exists('formatar_endereco')) {
+    function formatar_endereco($enderecoTexto)
+    {
+        if (empty($enderecoTexto)) {
+            return 'Endereço não informado';
+        }
+        
+        $partes = explode(',', $enderecoTexto);
+        $partes = array_map('trim', $partes);
+        
+        if (count($partes) >= 5) {
+            return sprintf(
+                '%s, %s - %s, %s/%s',
+                $partes[0],
+                $partes[1],
+                $partes[2],
+                $partes[3],
+                $partes[4]
+            );
+        }
+        
+        return $enderecoTexto;
+    }
+}
+
+if (!function_exists('extrair_endereco_array')) {
+    function extrair_endereco_array($enderecoTexto)
+    {
+        if (empty($enderecoTexto)) {
+            return null;
+        }
+        
+        $partes = explode(',', $enderecoTexto);
+        $partes = array_map('trim', $partes);
+        $partes = array_pad($partes, 6, '');
+        
+        return [
+            'logradouro' => $partes[0] ?? '',
+            'numero' => $partes[1] ?? '',
+            'bairro' => $partes[2] ?? '',
+            'cidade' => $partes[3] ?? '',
+            'estado' => $partes[4] ?? '',
+            'cep' => $partes[5] ?? '',
+        ];
     }
 }

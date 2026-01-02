@@ -16,6 +16,7 @@ class CarrinhoSeeder extends Seeder
             // Cada usuário tem um carrinho (se não existir)
             Carrinho::firstOrCreate([
                 'id_usuario' => $usuario->id_usuario,
+                'frete' => rand(5555,99999),
             ]);
         }
 

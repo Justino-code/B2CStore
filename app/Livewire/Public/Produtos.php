@@ -3,16 +3,27 @@
 
 namespace App\Livewire\Public;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use App\Models\Produto;
-use App\Models\Categoria;
-use App\Models\Marca;
+use Livewire\{
+    Component,
+    WithPagination
+};
+
+use App\Models\{
+    Produto,
+    Categoria,
+    Marca,
+};
+
+use App\Traits\{
+    HasCartActions,
+    HasFavorites,
+};
+
 use Illuminate\Support\Facades\Cache;
 
 class Produtos extends Component
 {
-    use WithPagination;
+    use WithPagination, HasCartActions, HasFavorites;
 
     public $search = '';
     public $categoriaId = '';
@@ -61,27 +72,6 @@ class Produtos extends Component
         $this->precoMax = 10000;
         $this->ordenarPor = 'mais_recentes';
         $this->resetPage();
-    }
-
-    public function addToCart($produtoId)
-    {
-        $this->dispatch('add-to-cart', produtoId: $produtoId);
-    }
-
-    public function addToFavorites($produtoId)
-    {
-        if (auth()->check()) {
-            auth()->user()->favoritos()->toggle($produtoId);
-            $this->dispatch('notify',
-                type: 'success',
-                message: 'Produto atualizado nos favoritos!'
-            );
-        } else {
-            $this->dispatch('notify',
-                type: 'warning',
-                message: 'Faça login para adicionar aos favoritos!'
-            );
-        }
     }
 
     public function render()

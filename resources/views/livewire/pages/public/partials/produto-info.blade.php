@@ -1,5 +1,8 @@
 {{-- resources/views/livewire/pages/public/partials/produto-info.blade.php --}}
-<div>
+<div x-data="{ 
+    isFavorito: {{ $isFavorite ? 'true' : 'false' }},
+    isLoadingFav: false 
+}">
     {{-- Category and Brand --}}
     <div class="flex items-center gap-4 mb-4">
         <a href="{{ route('categoria', $produto->categoria->slug) }}" 
@@ -143,7 +146,7 @@
     {{-- Action Buttons --}}
     <div class="flex flex-col sm:flex-row gap-4 mb-12">
         <button 
-            wire:click="addToCart"
+            wire:click="addToCart({{ $produto->id_produto }})"
             {{ $produto->estoque <= 0 ? 'disabled' : '' }}
             class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98]"
             aria-label="Adicionar ao carrinho"
@@ -153,11 +156,34 @@
         </button>
         
         <button 
-            wire:click="addToFavorites"
-            class="px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors flex items-center justify-center hover:scale-[1.02] active:scale-[0.98]"
+            wire:click="addToFavorites({{ $produto->id_produto }})"
+            @click="isLoadingFav = true"
+            wire:loading.attr="disabled"
+            :disabled="isLoadingFav"
+            class="px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] group"
             aria-label="Adicionar aos favoritos"
-        >
-            <i class="fas fa-heart text-xl {{ auth()->check() && auth()->user()->favoritos->contains($produto->id_produto) ? 'text-rose-500' : '' }}"></i>
+            @favorito-atualizado.window="
+                if ($event.detail.produtoId === {{ $produto->id_produto }}) {
+                    isFavorito = $event.detail.acao === 'adicionado';
+                    isLoadingFav = false;
+                }
+            ">
+            <div class="relative">
+                <i class="fas fa-heart text-xl transition-colors duration-300"
+                   :class="isFavorito ? 'text-rose-500' : 'text-gray-400 group-hover:text-rose-500'"
+                   x-show="!isLoadingFav"></i>
+                <div class="absolute inset-0 flex items-center justify-center"
+                     x-show="isLoadingFav"
+                     x-transition:enter="transition-opacity duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition-opacity duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0">
+                    <div class="w-4 h-4 border-2 border-rose-500/30 border-t-rose-500 
+                              rounded-full animate-spin"></div>
+                </div>
+            </div>
         </button>
     </div>
 

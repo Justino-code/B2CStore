@@ -12,9 +12,14 @@ use App\Models\{
     Marca,
 };
 
+use App\Traits\{
+    HasCartActions,
+    HasFavorites,
+};
+
 class CategoriaShow extends Component
 {
-    use WithPagination;
+    use WithPagination, HasCartActions, HasFavorites;
 
     public $categoria;
     public $slug;
@@ -24,6 +29,10 @@ class CategoriaShow extends Component
     public $precoMax = 10000;
     public $ordenarPor = 'mais_recentes';
     public $itensPorPagina = 12;
+    
+    // Novas propriedades para o filtro responsivo
+    public $mobileFiltersOpen = false;
+    public $contadorFiltrosAtivos = 0;
     
     protected $queryString = [
         'search' => ['except' => ''],
@@ -37,7 +46,11 @@ class CategoriaShow extends Component
     public function mount($slug)
     {
         $this->slug = $slug;
-        $this->carregarCategoria();
+        try {
+             $this->carregarCategoria();
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('unauthorized');
+        }
         
         // Buscar preço máximo para esta categoria
         $precoMaximo = Cache::remember('preco_maximo_categoria_' . $this->categoria->id_categoria, 3600, function () {
@@ -47,6 +60,9 @@ class CategoriaShow extends Component
         });
         
         $this->precoMax = min($precoMaximo, 10000);
+        
+        // Calcular contador inicial de filtros ativos
+        $this->calcularContadorFiltros();
     }
 
     private function carregarCategoria()
@@ -61,10 +77,57 @@ class CategoriaShow extends Component
         });
     }
 
+    // Computed property para verificar se há filtros ativos
+    public function getFiltrosAtivosProperty()
+    {
+        return $this->search || 
+               $this->marcaId || 
+               $this->precoMin > 0 || 
+               $this->precoMax < $this->getPrecoMaximoDisponivel();
+    }
+
+    // Método para calcular o contador de filtros ativos
+    private function calcularContadorFiltros()
+    {
+        $this->contadorFiltrosAtivos = 0;
+        
+        if ($this->search) {
+            $this->contadorFiltrosAtivos++;
+        }
+        
+        if ($this->marcaId) {
+            $this->contadorFiltrosAtivos++;
+        }
+        
+        $precoMaximoDisponivel = $this->getPrecoMaximoDisponivel();
+        if ($this->precoMin > 0 || $this->precoMax < $precoMaximoDisponivel) {
+            $this->contadorFiltrosAtivos++;
+        }
+    }
+
+    // Método auxiliar para obter o preço máximo disponível
+    private function getPrecoMaximoDisponivel()
+    {
+        return Cache::remember('preco_maximo_categoria_' . $this->categoria->id_categoria, 3600, function () {
+            return Produto::where('id_categoria', $this->categoria->id_categoria)
+                ->ativos()
+                ->comEstoque()
+                ->max('preco') ?? 10000;
+        });
+    }
+
     public function updated($property)
     {
         if (in_array($property, ['search', 'marcaId', 'precoMin', 'precoMax', 'ordenarPor', 'itensPorPagina'])) {
             $this->resetPage();
+            
+            // Atualizar contador de filtros
+            $this->calcularContadorFiltros();
+            
+            // Fechar filtro móvel após aplicar mudanças
+            if ($property !== 'ordenarPor' && $property !== 'itensPorPagina') {
+                $this->mobileFiltersOpen = false;
+            }
         }
     }
 
@@ -85,31 +148,47 @@ class CategoriaShow extends Component
         $this->ordenarPor = 'mais_recentes';
         $this->resetPage();
         
+        // Resetar contador
+        $this->contadorFiltrosAtivos = 0;
+        
         $this->dispatch('notify', 
             type: 'success',
             message: 'Filtros limpos com sucesso!'
         );
     }
 
-    public function addToCart($produtoId)
+    // Método para limpar apenas o filtro de preço
+    public function limparPrecoFiltro()
     {
-        $this->dispatch('add-to-cart', produtoId: $produtoId);
+        $precoMaximo = $this->getPrecoMaximoDisponivel();
+        $this->precoMin = 0;
+        $this->precoMax = $precoMaximo;
+        $this->resetPage();
+        
+        $this->calcularContadorFiltros();
+        
+        $this->dispatch('notify', 
+            type: 'success',
+            message: 'Filtro de preço removido!'
+        );
     }
 
-    public function addToFavorites($produtoId)
+    // Método para alternar o filtro móvel
+    public function toggleMobileFilters()
     {
-        if (auth()->check()) {
-            auth()->user()->favoritos()->toggle($produtoId);
-            $this->dispatch('notify', 
-                type: 'success',
-                message: 'Produto atualizado nos favoritos!'
-            );
-        } else {
-            $this->dispatch('notify',
-                type: 'warning',
-                message: 'Faça login para adicionar aos favoritos!'
-            );
-        }
+        $this->mobileFiltersOpen = !$this->mobileFiltersOpen;
+    }
+
+    // Método para aplicar filtros no mobile
+    public function aplicarFiltrosMobile()
+    {
+        $this->mobileFiltersOpen = false;
+        $this->calcularContadorFiltros();
+        
+        $this->dispatch('notify', 
+            type: 'success',
+            message: 'Filtros aplicados!'
+        );
     }
 
     public function render()
@@ -169,18 +248,31 @@ class CategoriaShow extends Component
                 ->get();
         });
 
+        // Calcular preço mínimo disponível
+        $precoMinimoDisponivel = Cache::remember('preco_minimo_categoria_' . $this->categoria->id_categoria, 300, function () {
+            return Produto::where('id_categoria', $this->categoria->id_categoria)
+                ->ativos()
+                ->comEstoque()
+                ->min('preco') ?? 0;
+        });
+
+        // Calcular preço máximo disponível
+        $precoMaximoDisponivel = Cache::remember('preco_maximo_categoria_' . $this->categoria->id_categoria, 300, function () {
+            return Produto::where('id_categoria', $this->categoria->id_categoria)
+                ->ativos()
+                ->comEstoque()
+                ->max('preco') ?? 10000;
+        });
+
         return view('livewire.pages.public.categoria-show', [
             'produtos' => $produtos,
             'marcas' => $marcas,
             'produtosDestaque' => $produtosDestaque,
             'totalProdutos' => $this->categoria->produtos_count,
-            'precoMinimoDisponivel' => Cache::remember('preco_minimo_categoria_' . $this->categoria->id_categoria, 300, function () {
-                return Produto::where('id_categoria', $this->categoria->id_categoria)
-                    ->ativos()
-                    ->comEstoque()
-                    ->min('preco') ?? 0;
-            }),
-            'precoMaximoDisponivel' => $this->precoMax,
+            'precoMinimoDisponivel' => $precoMinimoDisponivel,
+            'precoMaximoDisponivel' => $precoMaximoDisponivel,
+            'filtrosAtivos' => $this->filtrosAtivos,
+            'contadorFiltrosAtivos' => $this->contadorFiltrosAtivos,
         ])
         ->layout('components.layouts.public');
     }

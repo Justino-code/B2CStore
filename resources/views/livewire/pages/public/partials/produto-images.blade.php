@@ -1,10 +1,19 @@
 {{-- resources/views/livewire/pages/public/partials/produto-images.blade.php --}}
-<div>
+<div x-data="{ 
+    isFavorito: {{ $isFavorite ? 'true' : 'false' }},
+    isLoading: false
+}"
+@favorito-atualizado.window="
+    if ($event.detail.produtoId === {{ $produto->id_produto }}) {
+        isFavorito = $event.detail.acao === 'adicionado';
+        isLoading = false;
+    }
+">
     {{-- Desktop Image Gallery --}}
     <div class="hidden lg:block">
         {{-- Main Image --}}
         <div class="relative bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden mb-6 shadow-lg">
-            <div class="aspect-square flex items-center justify-center p-8">
+            <div>
                 @if($imagemSelecionada ?? $produto->imagens->first()?->url_imagem)
                     <img 
                         src="{{ image_url($imagemSelecionada ?? $produto->imagens->first()->url_imagem) }}" 
@@ -57,12 +66,32 @@
                 
                 {{-- Favorite Button --}}
                 <button 
-                    wire:click="addToFavorites"
+                    wire:click="addToFavorites({{ $produto->id_produto }})"
+                    @click="isLoading = true"
+                    wire:loading.attr="disabled"
+                    :disabled="isLoading"
                     class="absolute top-6 right-6 w-14 h-14 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform group"
-                    title="{{ auth()->check() && auth()->user()->favoritos->contains($produto->id_produto) ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}"
-                    aria-label="Adicionar aos favoritos"
-                >
-                    <i class="fas fa-heart text-2xl {{ auth()->check() && auth()->user()->favoritos->contains($produto->id_produto) ? 'text-rose-500' : 'text-gray-400 group-hover:text-rose-500' }}"></i>
+                    :title="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+                    aria-label="Adicionar aos favoritos">
+                    <div class="relative">
+                        {{-- Ícone do coração --}}
+                        <i class="fas fa-heart text-2xl transition-colors duration-300"
+                           :class="isFavorito ? 'text-rose-500' : 'text-gray-400 group-hover:text-rose-500'"
+                           x-show="!isLoading"></i>
+                        
+                        {{-- Loader durante a ação --}}
+                        <div class="absolute inset-0 flex items-center justify-center"
+                             x-show="isLoading"
+                             x-transition:enter="transition-opacity duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition-opacity duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0">
+                            <div class="w-5 h-5 border-2 border-rose-500/30 border-t-rose-500 
+                                      rounded-full animate-spin"></div>
+                        </div>
+                    </div>
                 </button>
             </div>
         </div>
@@ -96,7 +125,7 @@
     <div class="lg:hidden">
         {{-- Main Image --}}
         <div class="relative bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden mb-4">
-            <div class="aspect-square flex items-center justify-center p-4">
+            <div>
                 @if($imagemSelecionada ?? $produto->imagens->first()?->url_imagem)
                     <img 
                         src="{{ image_url($imagemSelecionada ?? $produto->imagens->first()->url_imagem) }}" 
@@ -129,11 +158,35 @@
                 
                 {{-- Favorite Button --}}
                 <button 
-                    wire:click="addToFavorites"
-                    class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                    title="{{ auth()->check() && auth()->user()->favoritos->contains($produto->id_produto) ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}"
-                >
-                    <i class="fas fa-heart text-xl {{ auth()->check() && auth()->user()->favoritos->contains($produto->id_produto) ? 'text-rose-500' : 'text-gray-400 hover:text-rose-500' }}"></i>
+                    wire:click="addToFavorites({{ $produto->id_produto }})"
+                    @click="isLoading = true"
+                    wire:loading.attr="disabled"
+                    :disabled="isLoading"
+                    class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform group"
+                    :title="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+                    @favorito-atualizado.window="
+                        if ($event.detail.produtoId === {{ $produto->id_produto }}) {
+                            isFavorito = $event.detail.acao === 'adicionado';
+                            isLoading = false;
+                        }
+                    ">
+                    <div class="relative">
+                        <i class="fas fa-heart text-xl transition-colors duration-300"
+                           :class="isFavorito ? 'text-rose-500' : 'text-gray-400 group-hover:text-rose-500'"
+                           x-show="!isLoading"></i>
+                        
+                        <div class="absolute inset-0 flex items-center justify-center"
+                             x-show="isLoading"
+                             x-transition:enter="transition-opacity duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition-opacity duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0">
+                            <div class="w-4 h-4 border-2 border-rose-500/30 border-t-rose-500 
+                                      rounded-full animate-spin"></div>
+                        </div>
+                    </div>
                 </button>
             </div>
         </div>

@@ -25,7 +25,7 @@ class RegisterManager extends Component
     public function mount(): void
     {
         if (Auth::check()) {
-            $this->redirect(route('dashboard'), navigate: true);
+            $this->redirect(route('cliente.dashboard'), navigate: true);
         }
     }
 
@@ -51,7 +51,7 @@ class RegisterManager extends Component
             );
             
             // Redirecionar após registro
-            $this->redirect(route('perfil'), navigate: true);
+            $this->redirect(route('cliente.dashboard'), navigate: true);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->isLoading = false;

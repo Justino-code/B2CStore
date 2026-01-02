@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Pedido extends Model
 {
@@ -36,7 +37,34 @@ class Pedido extends Model
         'data_entrega' => 'datetime',
     ];
 
+    /**
+     * Eventos do model
+     */
+    protected static function booted()
+    {
+        static::creating(function (Pedido $pedido) {
+            if (empty($pedido->codigo_pedido)) {
+                $pedido->codigo_pedido = self::gerarCodigoUnico();
+            }
+        });
+    }
+
+    /**
+     * Gera um código único para o pedido
+     */
+    private static function gerarCodigoUnico(): string
+    {
+        do {
+            $codigo = 'PED-' . strtoupper(Str::random(10));
+        } while (self::where('codigo_pedido', $codigo)->exists());
+
+        return $codigo;
+    }
+
+    // ─────────────────────────────
     // Relações
+    // ─────────────────────────────
+
     public function usuario()
     {
         return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
@@ -57,7 +85,10 @@ class Pedido extends Model
         return $this->hasOne(Pagamento::class, 'id_pedido', 'id_pedido');
     }
 
+    // ─────────────────────────────
     // Métodos de ajuda
+    // ─────────────────────────────
+
     public function subtotal()
     {
         return $this->total - $this->custo_envio + $this->valor_desconto;
@@ -83,16 +114,10 @@ class Pedido extends Model
         return $this->status === 'entregue';
     }
 
-    public function gerarCodigo()
-    {
-        if (!$this->codigo_pedido) {
-            $this->codigo_pedido = 'PED-' . strtoupper(uniqid());
-            $this->save();
-        }
-        return $this->codigo_pedido;
-    }
-
+    // ─────────────────────────────
     // Scopes
+    // ─────────────────────────────
+
     public function scopeDoUsuario($query, $usuarioId)
     {
         return $query->where('id_usuario', $usuarioId);

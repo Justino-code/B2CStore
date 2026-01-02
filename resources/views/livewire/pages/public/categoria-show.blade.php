@@ -28,8 +28,36 @@
 
     <div class="py-8 bg-white dark:bg-gray-900">
         <div class="container mx-auto px-4">
-            {{-- Category Header --}}
-            <div class="mb-12">
+            {{-- Mobile Filter Toggle --}}
+            <div class="lg:hidden mb-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white truncate">
+                            {{ $categoria->nome }}
+                        </h1>
+                        @if($categoria->descricao)
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1 truncate">
+                                {{ $categoria->descricao }}
+                            </p>
+                        @endif
+                    </div>
+                    <button 
+                        id="mobileFilterToggle"
+                        class="flex-shrink-0 flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        <i class="fas fa-filter mr-2"></i>
+                        Filtros
+                        @if($filtrosAtivos)
+                            <span class="ml-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {{ $contadorFiltrosAtivos }}
+                            </span>
+                        @endif
+                    </button>
+                </div>
+            </div>
+
+            {{-- Category Header (Desktop) --}}
+            <div class="hidden lg:block mb-12">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-8">
                     <div>
                         <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -61,19 +89,203 @@
                 </div>
             </div>
 
+            {{-- Mobile Filter Overlay --}}
+            <div id="mobileFilterOverlay" 
+                 class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden transition-opacity duration-300 hidden">
+                <div class="fixed inset-y-0 left-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 -translate-x-full">
+                    <div class="h-full flex flex-col">
+                        {{-- Filter Header --}}
+                        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Filtros</h2>
+                            <div class="flex items-center space-x-2">
+                                @if($filtrosAtivos)
+                                <button wire:click="limparFiltros" 
+                                        class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    Limpar todos
+                                </button>
+                                @endif
+                                <button id="mobileFilterClose" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                    <i class="fas fa-times text-gray-600 dark:text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Filter Content --}}
+                        <div class="flex-1 overflow-y-auto p-4">
+                            {{-- Search --}}
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Buscar produtos
+                                </label>
+                                <div class="relative">
+                                    <input type="text" 
+                                           wire:model.live.debounce.500ms="search"
+                                           placeholder="Digite o nome do produto..."
+                                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            {{-- Brands --}}
+                            @if($marcas->count() > 0)
+                            <div class="mb-6">
+                                <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">Marcas</h3>
+                                <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                                        <input type="radio" 
+                                               wire:model.live="marcaId"
+                                               value=""
+                                               class="text-blue-600 focus:ring-blue-500 rounded-full">
+                                        <span class="text-gray-600 dark:text-gray-400">Todas as marcas</span>
+                                    </label>
+                                    @foreach($marcas as $marca)
+                                    <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                                        <input type="radio" 
+                                               wire:model.live="marcaId"
+                                               value="{{ $marca->id_marca }}"
+                                               class="text-blue-600 focus:ring-blue-500 rounded-full">
+                                        <span class="text-gray-600 dark:text-gray-400 flex-1">
+                                            {{ $marca->nome }}
+                                        </span>
+                                        <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+                                            {{ $marca->produtos_count }}
+                                        </span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Price Range --}}
+                            <div class="mb-6">
+                                <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                    Faixa de Preço
+                                </h3>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                        <span>{{ format_kwanza(0) }}</span>
+                                        <span>{{ format_kwanza($precoMaximoDisponivel) }}</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Mínimo</label>
+                                            <input type="range" 
+                                                   wire:model.live="precoMin"
+                                                   min="0" 
+                                                   max="{{ $precoMaximoDisponivel }}"
+                                                   step="10"
+                                                   class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                            <div class="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                                {{ format_kwanza($precoMin) }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Máximo</label>
+                                            <input type="range" 
+                                                   wire:model.live="precoMax"
+                                                   min="0" 
+                                                   max="{{ $precoMaximoDisponivel }}"
+                                                   step="10"
+                                                   class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                            <div class="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                                {{ format_kwanza($precoMax) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Sort --}}
+                            <div class="mb-6">
+                                <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">Ordenar por</h3>
+                                <select wire:model.live="ordenarPor" 
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="mais_recentes">Mais recentes</option>
+                                    <option value="preco_menor">Preço: menor primeiro</option>
+                                    <option value="preco_maior">Preço: maior primeiro</option>
+                                    <option value="nome_az">Nome: A-Z</option>
+                                    <option value="nome_za">Nome: Z-A</option>
+                                    <option value="mais_vendidos">Mais vendidos</option>
+                                    <option value="mais_avaliados">Melhor avaliados</option>
+                                </select>
+                            </div>
+
+                            {{-- Items per page --}}
+                            <div>
+                                <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">Itens por página</h3>
+                                <select wire:model.live="itensPorPagina" 
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="12">12 produtos</option>
+                                    <option value="24">24 produtos</option>
+                                    <option value="36">36 produtos</option>
+                                    <option value="48">48 produtos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Filter Footer --}}
+                        <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+                            <button id="applyMobileFilters"
+                                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Main Content --}}
             <div class="flex flex-col lg:flex-row gap-8">
                 
-                {{-- Filters Sidebar --}}
-                <div class="lg:w-1/4">
+                {{-- Desktop Filters Sidebar --}}
+                <div class="hidden lg:block lg:w-1/4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 sticky top-4">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-lg font-bold text-gray-900 dark:text-white">Filtros</h2>
+                            @if($filtrosAtivos)
                             <button wire:click="limparFiltros" 
                                     class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
                                 Limpar todos
                             </button>
+                            @endif
                         </div>
+
+                        {{-- Active Filters --}}
+                        @if($filtrosAtivos)
+                        <div class="mb-6">
+                            <div class="flex flex-wrap gap-2">
+                                @if($search)
+                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                    Busca: {{ $search }}
+                                    <button wire:click="$set('search', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </span>
+                                @endif
+                                
+                                @if($marcaId)
+                                @php
+                                    $marcaSelecionada = $marcas->firstWhere('id_marca', $marcaId);
+                                @endphp
+                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                    Marca: {{ $marcaSelecionada->nome ?? '' }}
+                                    <button wire:click="$set('marcaId', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </span>
+                                @endif
+                                
+                                @if($precoMin > 0 || $precoMax < $precoMaximoDisponivel)
+                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                    Preço: {{ format_kwanza($precoMin) }} - {{ format_kwanza($precoMax) }}
+                                    <button wire:click="limparPrecoFiltro" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Search --}}
                         <div class="mb-6">
@@ -94,6 +306,13 @@
                         <div class="mb-6">
                             <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">Marcas</h3>
                             <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+                                    <input type="radio" 
+                                           wire:model.live="marcaId"
+                                           value=""
+                                           class="text-blue-600 focus:ring-blue-500 rounded-full">
+                                    <span class="text-gray-600 dark:text-gray-400">Todas as marcas</span>
+                                </label>
                                 @foreach($marcas as $marca)
                                 <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
                                     <input type="radio" 
@@ -108,13 +327,6 @@
                                     </span>
                                 </label>
                                 @endforeach
-                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
-                                    <input type="radio" 
-                                           wire:model.live="marcaId"
-                                           value=""
-                                           class="text-blue-600 focus:ring-blue-500 rounded-full">
-                                    <span class="text-gray-600 dark:text-gray-400">Todas as marcas</span>
-                                </label>
                             </div>
                         </div>
                         @endif
@@ -122,7 +334,7 @@
                         {{-- Price Range --}}
                         <div class="mb-6">
                             <h3 class="font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Preço: {{ format_kwanza($precoMin) }} - {{ format_kwanza($precoMax) }}
+                                Faixa de Preço
                             </h3>
                             <div class="space-y-4">
                                 <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
@@ -130,18 +342,30 @@
                                     <span>{{ format_kwanza($precoMaximoDisponivel) }}</span>
                                 </div>
                                 <div class="space-y-3">
-                                    <input type="range" 
-                                           wire:model.live="precoMin"
-                                           min="0" 
-                                           max="{{ $precoMaximoDisponivel }}"
-                                           step="10"
-                                           class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
-                                    <input type="range" 
-                                           wire:model.live="precoMax"
-                                           min="0" 
-                                           max="{{ $precoMaximoDisponivel }}"
-                                           step="10"
-                                           class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Mínimo</label>
+                                        <input type="range" 
+                                               wire:model.live="precoMin"
+                                               min="0" 
+                                               max="{{ $precoMaximoDisponivel }}"
+                                               step="10"
+                                               class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                        <div class="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                            {{ format_kwanza($precoMin) }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Máximo</label>
+                                        <input type="range" 
+                                               wire:model.live="precoMax"
+                                               min="0" 
+                                               max="{{ $precoMaximoDisponivel }}"
+                                               step="10"
+                                               class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                        <div class="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                            {{ format_kwanza($precoMax) }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,6 +439,43 @@
 
                 {{-- Products Section --}}
                 <div class="lg:w-3/4">
+                    {{-- Mobile Active Filters --}}
+                    @if($filtrosAtivos && !$mobileFiltersOpen)
+                    <div class="lg:hidden mb-6">
+                        <div class="flex flex-wrap gap-2">
+                            @if($search)
+                            <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                Busca: {{ $search }}
+                                <button wire:click="$set('search', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </span>
+                            @endif
+                            
+                            @if($marcaId)
+                            @php
+                                $marcaSelecionada = $marcas->firstWhere('id_marca', $marcaId);
+                            @endphp
+                            <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                Marca: {{ $marcaSelecionada->nome ?? '' }}
+                                <button wire:click="$set('marcaId', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </span>
+                            @endif
+                            
+                            @if($precoMin > 0 || $precoMax < $precoMaximoDisponivel)
+                            <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                Preço: {{ format_kwanza($precoMin) }} - {{ format_kwanza($precoMax) }}
+                                <button wire:click="limparPrecoFiltro" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </span>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- Results Info --}}
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -223,39 +484,14 @@
                                 de <span class="font-semibold text-gray-900 dark:text-white">{{ $totalProdutos }}</span> produtos
                             </div>
                             
-                            @if($search || $marcaId || $precoMin > 0 || $precoMax < $precoMaximoDisponivel)
-                            <div class="flex flex-wrap gap-2">
-                                @if($search)
-                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
-                                    Busca: {{ $search }}
-                                    <button wire:click="$set('search', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
-                                        <i class="fas fa-times text-xs"></i>
-                                    </button>
-                                </span>
-                                @endif
-                                
-                                @if($marcaId)
-                                @php
-                                    $marcaSelecionada = $marcas->firstWhere('id_marca', $marcaId);
-                                @endphp
-                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
-                                    Marca: {{ $marcaSelecionada->nome ?? '' }}
-                                    <button wire:click="$set('marcaId', '')" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
-                                        <i class="fas fa-times text-xs"></i>
-                                    </button>
-                                </span>
-                                @endif
-                                
-                                @if($precoMin > 0 || $precoMax < $precoMaximoDisponivel)
-                                <span class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
-                                    Preço: {{ format_kwanza($precoMin) }} - {{ format_kwanza($precoMax) }}
-                                    <button wire:click="limparPrecoFiltro" class="ml-2 hover:text-blue-800 dark:hover:text-blue-300">
-                                        <i class="fas fa-times text-xs"></i>
-                                    </button>
-                                </span>
-                                @endif
+                            {{-- Mobile Sort Toggle --}}
+                            <div class="lg:hidden flex items-center gap-2">
+                                <button id="mobileSortToggle"
+                                        class="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <i class="fas fa-sort mr-2"></i>
+                                    Ordenar
+                                </button>
                             </div>
-                            @endif
                         </div>
                     </div>
 
@@ -279,13 +515,13 @@
                                 Nenhum produto encontrado
                             </h3>
                             <p class="text-gray-600 dark:text-gray-400 mb-6">
-                                @if($search || $marcaId || $precoMin > 0 || $precoMax < $precoMaximoDisponivel)
+                                @if($filtrosAtivos)
                                     Nenhum produto corresponde aos seus filtros.
                                 @else
                                     Esta categoria ainda não possui produtos disponíveis.
                                 @endif
                             </p>
-                            @if($search || $marcaId || $precoMin > 0 || $precoMax < $precoMaximoDisponivel)
+                            @if($filtrosAtivos)
                                 <button wire:click="limparFiltros"
                                         class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 flex items-center justify-center space-x-2">
                                     <i class="fas fa-times mr-2"></i>
@@ -411,15 +647,86 @@
 
 @push('scripts')
 <script>
-    // Smooth scroll to top when filters change
-    Livewire.hook('commit', ({ component, commit, respond, succeed }) => {
-        respond(() => {
-            setTimeout(() => {
-                window.scrollTo({
-                    top: 200,
-                    behavior: 'smooth'
-                });
-            }, 100);
+    // Mobile filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterToggle = document.getElementById('mobileFilterToggle');
+        const filterOverlay = document.getElementById('mobileFilterOverlay');
+        const filterClose = document.getElementById('mobileFilterClose');
+        const applyFilters = document.getElementById('applyMobileFilters');
+        const mobileSortToggle = document.getElementById('mobileSortToggle');
+
+        // Toggle filter overlay
+        if (filterToggle && filterOverlay) {
+            filterToggle.addEventListener('click', function() {
+                filterOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    filterOverlay.classList.remove('opacity-0');
+                    filterOverlay.querySelector('.transform').classList.remove('-translate-x-full');
+                }, 10);
+            });
+
+            filterClose.addEventListener('click', function() {
+                filterOverlay.classList.add('opacity-0');
+                filterOverlay.querySelector('.transform').classList.add('-translate-x-full');
+                setTimeout(() => {
+                    filterOverlay.classList.add('hidden');
+                }, 300);
+            });
+
+            applyFilters.addEventListener('click', function() {
+                filterOverlay.classList.add('opacity-0');
+                filterOverlay.querySelector('.transform').classList.add('-translate-x-full');
+                setTimeout(() => {
+                    filterOverlay.classList.add('hidden');
+                }, 300);
+            });
+
+            // Close overlay when clicking outside
+            filterOverlay.addEventListener('click', function(e) {
+                if (e.target === filterOverlay) {
+                    filterOverlay.classList.add('opacity-0');
+                    filterOverlay.querySelector('.transform').classList.add('-translate-x-full');
+                    setTimeout(() => {
+                        filterOverlay.classList.add('hidden');
+                    }, 300);
+                }
+            });
+        }
+
+        // Mobile sort functionality
+        if (mobileSortToggle) {
+            mobileSortToggle.addEventListener('click', function() {
+                const sortSelect = document.querySelector('select[wire\\:model="ordenarPor"]');
+                if (sortSelect) {
+                    // Create modal or use native select on mobile
+                    if (window.innerWidth < 640) {
+                        sortSelect.focus();
+                    } else {
+                        // Show custom sort dropdown for tablets
+                        // You can implement a custom dropdown here if needed
+                        sortSelect.click();
+                    }
+                }
+            });
+        }
+
+        // Update filter counter
+        Livewire.hook('request', ({ component, succeed }) => {
+            succeed(() => {
+                // The filter counter will be updated via Livewire properties
+            });
+        });
+
+        // Smooth scroll to top when filters change
+        Livewire.hook('commit', ({ component, commit, respond, succeed }) => {
+            respond(() => {
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 200,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            });
         });
     });
 </script>

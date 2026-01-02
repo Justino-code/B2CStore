@@ -391,3 +391,16 @@ input[type="range"]::-moz-range-thumb {
     transform: translateX(100%);
     transition: transform 300ms ease-in;
 }
+
+.animate-pulse-slow {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }

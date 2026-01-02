@@ -1,22 +1,20 @@
 <x-layouts.app :title="$title ?? 'Cliente'">
 
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Navbar -->
+    <x-navbar.cliente />
 
-        <!-- Cliente Navbar -->
-        <x-navbar.cliente />
-
-        <!-- Page Header (opcional, para páginas específicas) -->
-        @isset($pageHeader)
-            <div class="bg-white dark:bg-gray-800 shadow transition-colors duration-300">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {{ $pageHeader }}
-                </div>
+    <!-- Page Header -->
+    @isset($pageHeader)
+        <div class="bg-white dark:bg-gray-800 shadow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {{ $pageHeader }}
             </div>
-        @endisset
+        </div>
+    @endisset
 
-        <!-- Main Content -->
-        <main class="cliente-container">
-            <!-- Breadcrumbs (opcional) -->
+    <!-- Container Principal com Altura Fixa -->
+    <div class="min-h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-900 pt-6 pb-24"> <!-- pb-24 para espaço do footer -->
+        <div class="cliente-container">
             @isset($breadcrumbs)
                 <div class="py-4">
                     <nav class="flex" aria-label="Breadcrumb">
@@ -33,37 +31,22 @@
                     <x-sidebar.cliente />
                 </div>
 
-                <!-- Conteúdo da Página -->
+                <!-- Conteúdo com Scroll -->
                 <div class="flex-1">
-                    <div class="cliente-card">
+                    <div class="cliente-card max-h-[calc(100vh-12rem)] overflow-y-auto">
                         {{ $slot }}
                     </div>
                 </div>
             </div>
-        </main>
-
-        <!-- Footer -->
-        <x-footer.public />
+        </div>
     </div>
 
-    <!-- Modal Container (para modais do cliente) -->
+    <!-- Footer FIXO no final -->
+    <footer class="fixed bottom-0 left-0 right-0">
+        <x-footer.cliente />
+    </footer>
+
+    <!-- Modal -->
     <div id="cliente-modal-container"></div>
 
 </x-layouts.app>
-
-@push('styles')
-<style>
-    /* Estilos específicos para área do cliente */
-    .cliente-container {
-        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
-    }
-
-    .cliente-card {
-        @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300;
-    }
-
-    .cliente-section-title {
-        @apply text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-300;
-    }
-</style>
-@endpush

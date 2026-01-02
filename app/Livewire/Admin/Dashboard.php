@@ -5,248 +5,97 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\Pedido;
 use App\Models\Produto;
-use App\Models\Usuario;
+use App\Models\Usuario as User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
+use Livewire\Attributes\Layout;
+
+#[Layout('components.layouts.admin')]
 class Dashboard extends Component
 {
-    public $stats = [];
-    public $pedidosRecentes = [];
-    public $produtosMaisVendidos = [];
-    public $dadosGrafico = [];
-    public $periodoSelecionado = '30';
+    public $periodo = 'hoje'; // hoje, semana, mes, ano
+    public $dadosDashboard;
 
     public function mount()
     {
-        $this->carregarEstatisticas();
-        $this->carregarPedidosRecentes();
-        $this->carregarProdutosMaisVendidos();
-        $this->carregarDadosGrafico();
+        $this->carregarDados();
     }
 
-    protected function carregarEstatisticas()
+    public function carregarDados()
     {
-        // Vendas totais (últimos 30 dias) - pedidos entregues
-        $vendasTotais = Pedido::where('status', 'entregue')
-            ->where('created_at', '>=', now()->subDays(30))
-            ->sum('total');
+        $dataInicio = $this->getDataInicio();
 
-        // Total de pedidos (últimos 30 dias)
-        $totalPedidos = Pedido::where('created_at', '>=', now()->subDays(30))
-            ->count();
-
-        // Total de clientes
-        $totalClientes = Usuario::where('role', 'cliente')->count();
-
-        // Total de produtos ativos
-        $totalProdutos = Produto::where('ativo', true)->count();
-
-        // Cálculo de crescimento (comparação com período anterior)
-        $vendasAnteriores = Pedido::where('status', 'entregue')
-            ->whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])
-            ->sum('total');
-
-        $pedidosAnteriores = Pedido::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])
-            ->count();
-
-        $crescimentoVendas = $vendasAnteriores > 0
-            ? round((($vendasTotais - $vendasAnteriores) / $vendasAnteriores) * 100, 1)
-            : 0;
-
-        $crescimentoPedidos = $pedidosAnteriores > 0
-            ? round((($totalPedidos - $pedidosAnteriores) / $pedidosAnteriores) * 100, 1)
-            : 0;
-
-        $this->stats = [
-            'vendas_totais' => [
-                'valor' => 'R$ ' . number_format($vendasTotais, 2, ',', '.'),
-                'variacao' => $crescimentoVendas > 0 ? '+' . $crescimentoVendas . '%' : $crescimentoVendas . '%',
-                'tendencia' => $crescimentoVendas > 0 ? 'up' : ($crescimentoVendas < 0 ? 'down' : 'neutral'),
-            ],
-            'total_pedidos' => [
-                'valor' => $totalPedidos,
-                'variacao' => $crescimentoPedidos > 0 ? '+' . $crescimentoPedidos . '%' : $crescimentoPedidos . '%',
-                'tendencia' => $crescimentoPedidos > 0 ? 'up' : ($crescimentoPedidos < 0 ? 'down' : 'neutral'),
-            ],
-            'total_clientes' => [
-                'valor' => $totalClientes,
-                'variacao' => '+5.3%', // Mock por enquanto
-                'tendencia' => 'up',
-            ],
-            'total_produtos' => [
-                'valor' => $totalProdutos,
-                'variacao' => '+2.1%', // Mock por enquanto
-                'tendencia' => 'up',
-            ],
-        ];
-    }
-
-    protected function carregarPedidosRecentes()
-    {
-        $this->pedidosRecentes = Pedido::with('usuario')
-            ->latest('created_at')
-            ->take(5)
-            ->get()
-            ->map(function ($pedido) {
-                return [
-                    'id_pedido' => $pedido->id_pedido,
-                    'codigo_pedido' => $pedido->codigo_pedido,
-                    'nome_cliente' => $pedido->usuario?->nome ?? 'Cliente Externo',
-                    'email_cliente' => $pedido->usuario?->email ?? '-',
-                    'data' => $pedido->created_at->format('d/m/Y'),
-                    'hora' => $pedido->created_at->format('H:i'),
-                    'total' => 'R$ ' . number_format($pedido->total, 2, ',', '.'),
-                    'status' => $pedido->status,
-                    'cor_status' => $this->obterCorStatus($pedido->status),
-                ];
-            })
-            ->toArray();
-    }
-
-    protected function carregarProdutosMaisVendidos()
-    {
-        // Primeiro, obtenha os IDs dos produtos mais vendidos
-        $produtosMaisVendidosIds = DB::table('pedido_itens')
-            ->select(
-                'pedido_itens.id_produto',
-                DB::raw('SUM(pedido_itens.quantidade) as total_vendido'),
-                DB::raw('SUM(pedido_itens.quantidade * pedido_itens.preco_unitario) as receita_total')
-            )
-            ->join('pedidos', 'pedido_itens.id_pedido', '=', 'pedidos.id_pedido')
-            ->where('pedidos.status', 'entregue')
-            ->groupBy('pedido_itens.id_produto')
-            ->orderBy('total_vendido', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Prepare os dados para retorno
-        $this->produtosMaisVendidos = [];
-
-        foreach ($produtosMaisVendidosIds as $indice => $item) {
-            $produto = Produto::with(['imagens'])->find($item->id_produto);
-
-            if ($produto) {
-                $this->produtosMaisVendidos[] = [
-                    'posicao' => $indice + 1,
-                    'id_produto' => $produto->id_produto,
-                    'nome' => $produto->nome,
-                    'imagem' => $produto->imagens->first()?->url_imagem ?? '/images/placeholder.png',
-                    'total_vendido' => $item->total_vendido,
-                    'receita_total' => 'R$ ' . number_format($item->receita_total ?? 0, 2, ',', '.'),
-                    'status' => $produto->ativo ? 'active' : 'inactive',
-                ];
-            }
-        }
-
-        // Se não houver produtos vendidos, retorne array vazio
-        if (empty($this->produtosMaisVendidos)) {
-            $this->produtosMaisVendidos = [];
-        }
-    }
-
-    protected function carregarDadosGrafico()
-    {
-        $dias = (int) $this->periodoSelecionado;
-        $dataInicio = now()->subDays($dias);
-
-        $dados = Pedido::where('status', 'entregue')
+        // Dados de vendas
+        $vendas = Pedido::where('status', 'entregue')
             ->where('created_at', '>=', $dataInicio)
-            ->select(
-                DB::raw('DATE(created_at) as data'),
-                DB::raw('COUNT(*) as pedidos'),
-                DB::raw('SUM(total) as receita')
-            )
-            ->groupBy('data')
-            ->orderBy('data')
             ->get();
 
-        $labels = [];
-        $dadosPedidos = [];
-        $dadosReceita = [];
+        $totalVendas = $vendas->sum('total');
+        $totalProdutosVendidos = $vendas->sum(function($pedido) {
+            return $pedido->itens->sum('quantidade');
+        });
 
-        for ($i = 0; $i <= $dias; $i++) {
-            $data = $dataInicio->copy()->addDays($i)->format('Y-m-d');
-            $labelDia = $dataInicio->copy()->addDays($i)->format('d/m');
+        // Status dos pedidos
+        $pedidosStatus = [
+            'pendente' => Pedido::where('status', 'pendente')->count(),
+            'processando' => Pedido::where('status', 'processando')->count(),
+            'enviado' => Pedido::where('status', 'enviado')->count(),
+            'entregue' => Pedido::where('status', 'entregue')->count(),
+            'cancelado' => Pedido::where('status', 'cancelado')->count(),
+        ];
 
-            $dadosDia = $dados->firstWhere('data', $data);
+        // Resumo financeiro
+        $receita = $totalVendas;
+        $pagamentosPendentes = Pedido::whereIn('status', ['pendente', 'processando'])->sum('total');
 
-            $labels[] = $labelDia;
-            $dadosPedidos[] = $dadosDia ? $dadosDia->pedidos : 0;
-            $dadosReceita[] = $dadosDia ? (float) $dadosDia->receita : 0;
-        }
+        // Últimos pedidos
+        $ultimosPedidos = Pedido::with('usuario')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
-        $this->dadosGrafico = [
-            'labels' => $labels,
-            'datasets' => [
-                [
-                    'label' => 'Pedidos',
-                    'data' => $dadosPedidos,
-                    'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
-                    'fill' => true,
-                ],
-                [
-                    'label' => 'Receita (R$)',
-                    'data' => $dadosReceita,
-                    'borderColor' => '#8b5cf6',
-                    'backgroundColor' => 'rgba(139, 92, 246, 0.1)',
-                    'fill' => true,
-                ]
-            ]
+        // Produtos com estoque baixo
+        $estoqueBaixo = Produto::where('estoque', '<', 10)
+            ->where('ativo', true)
+            ->with('imagens')
+            ->take(5)
+            ->get();
+
+        $this->dadosDashboard = [
+            'totalVendas' => $totalVendas,
+            'totalProdutosVendidos' => $totalProdutosVendidos,
+            'pedidosStatus' => $pedidosStatus,
+            'receita' => $receita,
+            'pagamentosPendentes' => $pagamentosPendentes,
+            'saldo' => $receita - $pagamentosPendentes,
+            'ultimosPedidos' => $ultimosPedidos,
+            'estoqueBaixo' => $estoqueBaixo,
+            'totalClientes' => User::where('role', 'cliente')->count(),
+            'totalProdutos' => Produto::count(),
         ];
     }
 
-    public function updatedPeriodoSelecionado()
+    private function getDataInicio()
     {
-        $this->carregarDadosGrafico();
-    }
-
-    public function atualizarDados()
-    {
-        $this->carregarEstatisticas();
-        $this->carregarPedidosRecentes();
-        $this->carregarProdutosMaisVendidos();
-        $this->carregarDadosGrafico();
-
-        $this->dispatch('notificar', [
-            'tipo' => 'success',
-            'mensagem' => 'Dados atualizados com sucesso!'
-        ]);
-    }
-
-    protected function obterCorStatus($status)
-    {
-        return match($status) {
-            'pendente' => 'yellow',
-            'pago' => 'blue',
-            'processando' => 'blue',
-            'enviado' => 'purple',
-            'entregue' => 'green',
-            'cancelado' => 'red',
-            default => 'gray',
+        $now = Carbon::now();
+        
+        return match($this->periodo) {
+            'hoje' => $now->startOfDay(),
+            'semana' => $now->startOfWeek(),
+            'mes' => $now->startOfMonth(),
+            'ano' => $now->startOfYear(),
+            default => $now->startOfDay(),
         };
     }
 
-    protected function traduzirStatus($status)
+    public function alterarPeriodo($periodo)
     {
-        return match($status) {
-            'pending' => 'pendente',
-            'pago' => 'pago',
-            'processing' => 'processando',
-            'enviado' => 'enviado',
-            'completed' => 'entregue',
-            'cancelled' => 'cancelado',
-            default => $status,
-        };
+        $this->periodo = $periodo;
+        $this->carregarDados();
     }
 
     public function render()
     {
-        return view('livewire.admin.dashboard')
-            ->layout('components.layouts.admin', [
-                'pageTitle' => 'Dashboard',
-                'pageDescription' => 'Visão geral do seu negócio'
-            ]);
+        return view('livewire.admin.dashboard');
     }
 }

@@ -1,369 +1,273 @@
-{{-- resources/views/livewire/admin/dashboard.blade.php --}}
-<div class="space-y-6">
-    <!-- Cabeçalho com Botão de Atualização -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Última atualização: {{ now()->format('d/m/Y H:i') }}
-            </p>
+<div class="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Filtro de período -->
+    <div class="mb-6 flex items-center justify-between">
+        <div class="flex space-x-2">
+            <button wire:click="alterarPeriodo('hoje')" 
+                    class="px-4 py-2 rounded-md {{ $periodo === 'hoje' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Hoje
+            </button>
+            <button wire:click="alterarPeriodo('semana')" 
+                    class="px-4 py-2 rounded-md {{ $periodo === 'semana' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Esta Semana
+            </button>
+            <button wire:click="alterarPeriodo('mes')" 
+                    class="px-4 py-2 rounded-md {{ $periodo === 'mes' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Este Mês
+            </button>
+            <button wire:click="alterarPeriodo('ano')" 
+                    class="px-4 py-2 rounded-md {{ $periodo === 'ano' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                Este Ano
+            </button>
         </div>
-        <button wire:click="atualizarDados"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-            <svg wire:loading.remove wire:target="atualizarDados" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            <svg wire:loading wire:target="atualizarDados" class="animate-spin w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            <span wire:loading.remove wire:target="atualizarDados">Atualizar Dados</span>
-            <span wire:loading wire:target="atualizarDados">Atualizando...</span>
-        </button>
     </div>
 
-    <!-- Visão Geral de Estatísticas -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <x-admin.cards.stat-card
-            title="Vendas Totais"
-            :value="$stats['vendas_totais']['valor'] ?? 'R$ 0,00'"
-            :change="$stats['vendas_totais']['variacao'] ?? '0%'"
-            :trend="$stats['vendas_totais']['tendencia'] ?? 'neutral'"
-            icon="dollar"
-            color="blue"
-        />
-
-        <x-admin.cards.stat-card
-            title="Pedidos"
-            :value="$stats['total_pedidos']['valor'] ?? '0'"
-            :change="$stats['total_pedidos']['variacao'] ?? '0%'"
-            :trend="$stats['total_pedidos']['tendencia'] ?? 'neutral'"
-            icon="shopping-cart"
-            color="green"
-        />
-
-        <x-admin.cards.stat-card
-            title="Clientes"
-            :value="$stats['total_clientes']['valor'] ?? '0'"
-            :change="$stats['total_clientes']['variacao'] ?? '0%'"
-            :trend="$stats['total_clientes']['tendencia'] ?? 'neutral'"
-            icon="users"
-            color="purple"
-        />
-
-        <x-admin.cards.stat-card
-            title="Produtos"
-            :value="$stats['total_produtos']['valor'] ?? '0'"
-            :change="$stats['total_produtos']['variacao'] ?? '0%'"
-            :trend="$stats['total_produtos']['tendencia'] ?? 'neutral'"
-            icon="box"
-            color="yellow"
-        />
-    </div>
-
-    <!-- Seção de Gráficos -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Gráfico de Receita -->
-        <div class="lg:col-span-2">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Vendas dos Últimos {{ $periodoSelecionado }} Dias</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Desempenho de vendas diárias</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Período:</span>
-                        <select wire:model.live="periodoSelecionado"
-                                class="text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="7">7 dias</option>
-                            <option value="30">30 dias</option>
-                            <option value="90">90 dias</option>
-                        </select>
-                    </div>
+    <!-- Cards de métricas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total de Vendas -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Total de Vendas</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ format_kwanza($dadosDashboard['totalVendas'] ?? 0) }}
+                    </p>
                 </div>
-
-                <!-- Gráfico -->
-                <div x-data="{
-                    grafico: null,
-                    iniciar() {
-                        const ctx = this.$refs.canvasGrafico;
-                        const dados = @js($dadosGrafico);
-
-                        this.grafico = new Chart(ctx, {
-                            type: 'line',
-                            data: dados,
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                        labels: {
-                                            color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#d1d5db' : '#374151'
-                                        }
-                                    },
-                                    tooltip: {
-                                        mode: 'index',
-                                        intersect: false,
-                                        callbacks: {
-                                            label: function(context) {
-                                                let label = context.dataset.label || '';
-                                                if (label) {
-                                                    label += ': ';
-                                                }
-                                                if (context.datasetIndex === 1) {
-                                                    label += 'R$ ' + context.parsed.y.toFixed(2).replace('.', ',');
-                                                } else {
-                                                    label += context.parsed.y;
-                                                }
-                                                return label;
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        grid: {
-                                            color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#374151' : '#e5e7eb'
-                                        },
-                                        ticks: {
-                                            color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#9ca3af' : '#6b7280'
-                                        }
-                                    },
-                                    y: {
-                                        beginAtZero: true,
-                                        grid: {
-                                            color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#374151' : '#e5e7eb'
-                                        },
-                                        ticks: {
-                                            color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#9ca3af' : '#6b7280',
-                                            callback: function(value) {
-                                                if (this.scale.id === 'y') {
-                                                    return 'R$ ' + value.toFixed(0);
-                                                }
-                                                return value;
-                                            }
-                                        }
-                                    }
-                                },
-                                interaction: {
-                                    intersect: false,
-                                    mode: 'nearest'
-                                }
-                            }
-                        });
-
-                        // Atualizar gráfico ao mudar tema
-                        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                            const isDark = e.matches;
-                            this.grafico.options.plugins.legend.labels.color = isDark ? '#d1d5db' : '#374151';
-                            this.grafico.options.scales.x.grid.color = isDark ? '#374151' : '#e5e7eb';
-                            this.grafico.options.scales.x.ticks.color = isDark ? '#9ca3af' : '#6b7280';
-                            this.grafico.options.scales.y.grid.color = isDark ? '#374151' : '#e5e7eb';
-                            this.grafico.options.scales.y.ticks.color = isDark ? '#9ca3af' : '#6b7280';
-                            this.grafico.update();
-                        });
-                    }
-                }"
-                x-init="iniciar"
-                wire:ignore>
-                    <div class="h-64">
-                        <canvas x-ref="canvasGrafico"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Produtos Mais Vendidos -->
-        <div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Produtos Mais Vendidos</h3>
-
-                <div class="space-y-4">
-                    @forelse($produtosMaisVendidos as $produto)
-                        <div class="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200">
-                            <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $produto['posicao'] }}</span>
-                            </div>
-                            <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {{ $produto['nome'] }}
-                                </p>
-                                <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                                    <span>{{ $produto['total_vendido'] }} vendas</span>
-                                    <span>•</span>
-                                    <span>{{ $produto['receita_total'] }}</span>
-                                </div>
-                            </div>
-                            <x-admin.badges.status :status="$produto['status']" size="sm" />
-                        </div>
-                    @empty
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                            </svg>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Nenhum produto vendido ainda</p>
-                        </div>
-                    @endforelse
-                </div>
-
-                <a href="{{ route('home') }}"
-                   class="mt-4 inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
-                    Ver todos os produtos
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produtos Vendidos -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Produtos Vendidos</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ $dadosDashboard['totalProdutosVendidos'] ?? 0 }}
+                    </p>
+                </div>
+                <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total de Clientes -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Total de Clientes</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ $dadosDashboard['totalClientes'] ?? 0 }}
+                    </p>
+                </div>
+                <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 3.75l-4.5-2.48m0 0l-4.5 2.48m4.5-2.48v7.5"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saldo Disponível -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Saldo Disponível</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ format_kwanza($dadosDashboard['saldo'] ?? 0) }}
+                    </p>
+                </div>
+                <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+                    <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Pedidos Recentes & Ações Rápidas -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Pedidos Recentes -->
+    <!-- Status dos Pedidos -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="lg:col-span-2">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pedidos Recentes</h3>
-                        <a href="{{ route('home') }}"
-                           class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
-                            Ver todos
-                        </a>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Pedido
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Cliente
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Data
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Total
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    Ações
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($pedidosRecentes as $pedido)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $pedido['codigo_pedido'] }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $pedido['nome_cliente'] }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $pedido['email_cliente'] }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $pedido['data'] }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $pedido['hora'] }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">
-                                        {{ $pedido['total'] }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $statusTraduzido = match($pedido['status']) {
-                                                'pendente' => 'pending',
-                                                'pago' => 'approved',
-                                                'processando' => 'processing',
-                                                'enviado' => 'completed',
-                                                'entregue' => 'completed',
-                                                'cancelado' => 'cancelled',
-                                                default => 'pending',
-                                            };
-                                        @endphp
-                                        <x-admin.badges.status :status="$statusTraduzido" />
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('home', $pedido['id_pedido']) }}"
-                                           class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium">
-                                            Ver
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center">
-                                        <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                        </svg>
-                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Nenhum pedido encontrado</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Status dos Pedidos</h2>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    @foreach($dadosDashboard['pedidosStatus'] ?? [] as $status => $quantidade)
+                        <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $quantidade }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 capitalize">{{ $status }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
 
-        <!-- Ações Rápidas -->
-        <div>
-            <div class="space-y-6">
-                <x-admin.cards.action-card
-                    title="Adicionar Produto"
-                    description="Crie um novo produto no catálogo"
-                    icon='<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>'
-                    :action="route('home')"
-                    actionText="Criar Produto"
-                    color="green"
-                />
+        <!-- Resumo Financeiro -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Resumo Financeiro</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Receita Total</span>
+                    <span class="font-semibold text-green-600 dark:text-green-400">
+                        {{ format_kwanza($dadosDashboard['receita'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-400">Pagamentos Pendentes</span>
+                    <span class="font-semibold text-yellow-600 dark:text-yellow-400">
+                        {{ format_kwanza($dadosDashboard['pagamentosPendentes'] ?? 0) }}
+                    </span>
+                </div>
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-gray-900 dark:text-white">Saldo Disponível</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">
+                            {{ format_kwanza($dadosDashboard['saldo'] ?? 0) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <x-admin.cards.action-card
-                    title="Ver Relatórios"
-                    description="Acesse relatórios detalhados"
-                    icon='<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'
-                    :action="route('home')"
-                    actionText="Ver Relatórios"
-                    color="blue"
-                />
+    <!-- Últimos Pedidos e Estoque Baixo -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Últimos Pedidos -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Últimos Pedidos</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Pedido</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse($dadosDashboard['ultimosPedidos'] ?? [] as $pedido)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $pedido->codigo_pedido }}
+                                    </span>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $pedido->created_at->format('d/m/Y H:i') }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ $pedido->usuario->nome }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 text-xs rounded-full 
+                                        {{ $pedido->status == 'entregue' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : '' }}
+                                        {{ $pedido->status == 'pendente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : '' }}
+                                        {{ $pedido->status == 'cancelado' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : '' }}
+                                        {{ $pedido->status == 'processando' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : '' }}
+                                        {{ $pedido->status == 'enviado' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' : '' }}">
+                                        {{ ucfirst($pedido->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ format_kwanza($pedido->total) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Nenhum pedido encontrado
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                <x-admin.cards.info-card
-                    title="Status do Sistema"
-                    description="Todos os sistemas operando normalmente"
-                    variant="success"
-                    icon='<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-                    :action="route('home')"
-                    actionText="Ver detalhes"
-                />
+        <!-- Produtos com Estoque Baixo -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Estoque Baixo</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Produto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">SKU</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estoque</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse($dadosDashboard['estoqueBaixo'] ?? [] as $produto)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            @if($produto->imagens->first())
+                                                <img class="h-10 w-10 rounded-md object-cover" 
+                                                     src="{{ image_url($produto->imagens->first()->url_imagem) }}" 
+                                                     alt="{{ $produto->nome }}">
+                                            @else
+                                                <div class="h-10 w-10 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
+                                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ \Illuminate\Support\Str::limit($produto->nome, 30) }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ format_kwanza($produto->preco) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ $produto->sku }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm font-medium 
+                                        {{ $produto->estoque < 5 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' }}">
+                                        {{ $produto->estoque }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 text-xs rounded-full 
+                                        {{ $produto->estoque < 5 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' }}">
+                                        {{ $produto->estoque < 5 ? 'Crítico' : 'Baixo' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Nenhum produto com estoque baixo
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Ouvir eventos do Livewire
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('notificar', (data) => {
-            if (typeof window.showNotification === 'function') {
-                window.showNotification(data.tipo, data.mensagem);
-            }
-        });
-    });
-</script>
-@endpush

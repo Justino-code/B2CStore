@@ -22,7 +22,18 @@ window.addEventListener('livewire:init', () => {
 
     Livewire.on('showConfirmation', (data) => {
         const options = typeof data === 'object' ? data : { message: data };
-        notificationService.showConfirmation(options).then((result) => {
+        const {method, params, ...optionsNotification} = options;
+        notificationService.showConfirmation(optionsNotification).then((result) => {
+            if (result.isConfirmed && options.method) {
+                Livewire.dispatch(options.method, options.params || []);
+            }
+        });
+    });
+
+     Livewire.on('confirm', (data) => {        
+        const options = typeof data === 'object' ? data : { message: data };
+        const {method, params, ...optionsNotification} = options;
+        notificationService.showConfirmation(optionsNotification).then((result) => {
             if (result.isConfirmed && options.method) {
                 Livewire.dispatch(options.method, options.params || []);
             }

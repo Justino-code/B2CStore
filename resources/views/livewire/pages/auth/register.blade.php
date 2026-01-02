@@ -228,8 +228,7 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">
             {{ __('Já tem uma conta?') }}
             <a href="{{ route('login') }}"
-               class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-200"
-               wire:navigate>
+               class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-200">
                 {{ __('Faça login') }}
             </a>
         </p>

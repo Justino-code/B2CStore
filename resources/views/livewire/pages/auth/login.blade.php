@@ -162,8 +162,7 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">
             {{ __('Não tem uma conta?') }}
             <a href="{{ route('register') }}"
-               class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-200"
-               wire:navigate>
+               class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-200">
                 {{ __('Cadastre-se') }}
             </a>
         </p>

@@ -2,7 +2,13 @@
 
 @php
     $imagem = $produto->imagens->first()?->url_imagem;
-    $isFavorito = auth()->check() && auth()->user()->favoritos->contains($produto->id_produto);
+    
+    // Verifica se está nos favoritos - APENAS para clientes
+    $isFavorito = false;
+    if (auth()->check() && auth()->user()->role === 'cliente') {
+        $isFavorito = $this->isFavorite($produto->id_produto);
+    }
+    
     $desconto = calculateDiscountPercentage($produto->preco, $produto->preco_promocional);
 @endphp
 
@@ -11,14 +17,124 @@
             relative before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-50/0 before:via-white/0 before:to-white/0
             dark:before:from-gray-900/0 before:transition-all before:duration-700 before:hover:from-blue-50/5 before:hover:via-white/3
             dark:before:hover:from-blue-500/5 before:hover:to-white/5"
-     x-data="{ showActions: false }"
+     x-data="{ 
+        showActions: false,
+        isFavorito: {{ $isFavorito ? 'true' : 'false' }},
+        showFavButton: {{ $isFavorito ? 'true' : 'false' }},
+        isLoading: false,
+        isLoadingHover: false
+     }"
      @mouseenter="showActions = true"
-     @mouseleave="showActions = false">
+     @mouseleave="showActions = false"
+     @favorito-atualizado.window="
+        if ($event.detail.produtoId === {{ $produto->id_produto }}) {
+            isFavorito = $event.detail.acao === 'adicionado';
+            showFavButton = isFavorito;
+            // Força reação do Alpine
+            $nextTick(() => {
+                // Atualiza qualquer estado necessário
+            });
+        }
+     ">
 
     {{-- Efeito de brilho sutil --}}
     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 
                 group-hover:from-blue-500/5 group-hover:via-indigo-500/5 group-hover:to-purple-500/5 
                 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10"></div>
+
+    {{-- Botão Favorito APENAS quando o produto está nos favoritos --}}
+    <div class="absolute top-4 right-4 z-30"
+         x-show="showFavButton"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-90"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-90">
+        <button wire:click="addToFavorites({{ $produto->id_produto }})"
+                wire:loading.attr="disabled"
+                :disabled="isLoading"
+                @click="isLoading = true; $event.stopPropagation();"
+                class="relative group/fav-heart overflow-hidden"
+                x-init="
+                    // Quando a ação do Livewire terminar, remove o loading
+                    Livewire.hook('commit', ({ component, commit, succeed }) => {
+                        if (component.id === $wire.__instance.id) {
+                            succeed(() => {
+                                setTimeout(() => {
+                                    isLoading = false;
+                                }, 100);
+                            });
+                        }
+                    });
+                ">
+            
+            {{-- Efeito de fundo --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-pink-500/0 
+                        group-hover/fav-heart:from-rose-500/20 group-hover/fav-heart:to-pink-500/20 
+                        rounded-full blur transition-all duration-500"></div>
+            
+            {{-- Ícone do coração --}}
+            <div class="relative w-10 h-10 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm 
+                        flex items-center justify-center shadow-lg 
+                        transition-all duration-300 group-hover/fav-heart:scale-110 
+                        group-hover/fav-heart:shadow-xl group-hover/fav-heart:bg-white dark:group-hover/fav-heart:bg-gray-700
+                        ring-2 ring-rose-500/40 shadow-rose-500/20">
+                
+                {{-- Coração preenchido --}}
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-heart text-lg text-rose-500"
+                       :class="{ 'animate-pulse-fast': !isLoading }"
+                       x-show="!isLoading"></i>
+                </div>
+                
+                {{-- Loader durante a ação --}}
+                <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+                     :class="{ 'opacity-100': isLoading, 'opacity-0': !isLoading }"
+                     x-show="isLoading">
+                    <div class="w-4 h-4 border-2 border-rose-500/30 border-t-rose-500 
+                                rounded-full animate-spin"></div>
+                </div>
+            </div>
+            
+            {{-- Tooltip --}}
+            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-2 py-1.5 
+                        bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium rounded 
+                        opacity-0 group-hover/fav-heart:opacity-100 transition-all duration-300 
+                        whitespace-nowrap pointer-events-none">
+                Remover dos favoritos
+                <div class="absolute -top-1.5 left-1/2 transform -translate-x-1/2 w-2 h-2 
+                            bg-gray-900 dark:bg-gray-700 rotate-45"></div>
+            </div>
+        </button>
+    </div>
+
+    {{-- Badges superiores --}}
+    <div class="absolute top-4 left-4 z-20 flex flex-col gap-3">
+        @if($desconto > 0)
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-70"></div>
+                <span class="relative px-3 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white 
+                           text-xs font-bold rounded-xl shadow-lg flex items-center gap-1.5"
+                      onclick="event.stopPropagation();">
+                    <i class="fas fa-bolt text-xs"></i>
+                    {{ $desconto }}% OFF
+                </span>
+            </div>
+        @endif
+        
+        @if($produto->novidade)
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-70"></div>
+                <span class="relative px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white 
+                           text-xs font-bold rounded-xl shadow-lg flex items-center gap-1.5"
+                      onclick="event.stopPropagation();">
+                    <i class="fas fa-sparkles text-xs"></i>
+                    NOVO
+                </span>
+            </div>
+        @endif
+    </div>
 
     <div class="flex flex-col lg:flex-row relative z-10">
 
@@ -40,30 +156,6 @@
                                 <div class="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-500/20 rounded-full blur-xl"></div>
                                 <i class="fas fa-cube text-gray-300 dark:text-gray-600 text-5xl relative z-10"></i>
                             </div>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Badges modernas --}}
-                <div class="absolute top-4 left-4 flex flex-col gap-3">
-                    @if($desconto > 0)
-                        <div class="relative">
-                            <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-70"></div>
-                            <span class="relative px-3 py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white 
-                                       text-xs font-bold rounded-xl shadow-lg flex items-center gap-1.5">
-                                <i class="fas fa-bolt text-xs"></i>
-                                {{ $desconto }}% OFF
-                            </span>
-                        </div>
-                    @endif
-                    @if($produto->novidade)
-                        <div class="relative">
-                            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-70"></div>
-                            <span class="relative px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white 
-                                       text-xs font-bold rounded-xl shadow-lg flex items-center gap-1.5">
-                                <i class="fas fa-sparkles text-xs"></i>
-                                NOVO
-                            </span>
                         </div>
                     @endif
                 </div>
@@ -241,7 +333,7 @@
                              x-transition:leave-start="opacity-100 translate-y-0"
                              x-transition:leave-end="opacity-0 translate-y-2">
                             
-                            {{-- Botão principal de compra (VERSÃO MELHORADA) --}}
+                            {{-- Botão principal de compra --}}
                             @if($produto->estoque > 0 && $produto->estoque <= 5)
                                 {{-- Botão de urgência para estoque baixo --}}
                                 <button wire:click="addToCart({{ $produto->id_produto }})"
@@ -347,54 +439,74 @@
 
                             {{-- Botões secundários --}}
                             <div class="flex gap-3">
-                                {{-- Favorito --}}
-                                <button wire:click="addToFavorites({{ $produto->id_produto }})"
-                                        class="flex-1 group/fav relative overflow-hidden">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white 
-                                                dark:from-gray-800 dark:to-gray-900 border border-gray-300/50 
-                                                dark:border-gray-600/50 rounded-xl transition-all duration-300 
-                                                group-hover/fav:border-rose-300 dark:group-hover/fav:border-rose-500/50"></div>
-                                    <div class="relative py-3 rounded-xl flex items-center justify-center gap-2 
-                                                transition-all duration-300 group-hover/fav:scale-105">
-                                        <i class="fas fa-heart text-lg {{ $isFavorito ? 'text-rose-500' : 'text-gray-600 dark:text-gray-400' }} 
-                                                  group-hover/fav:text-rose-500 transition-colors duration-300"></i>
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $isFavorito ? 'Salvo' : 'Salvar' }}
-                                        </span>
+                                {{-- Botão para ADICIONAR aos favoritos (só aparece no hover quando não está nos favoritos) --}}
+                                @if(auth()->check() && auth()->user()->role === 'cliente')
+                                    <div x-show="!isFavorito && showActions"
+                                         x-transition:enter="transition ease-out duration-300"
+                                         x-transition:enter-start="opacity-0 scale-90"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-200"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-90">
+                                        <button wire:click="addToFavorites({{ $produto->id_produto }})"
+                                                wire:loading.attr="disabled"
+                                                class="relative group/fav-alt overflow-hidden z-20"
+                                                @click="isLoadingHover = true; $event.stopPropagation();"
+                                                x-init="
+                                                    // Quando a ação do Livewire terminar, remove o loading
+                                                    Livewire.hook('commit', ({ component, commit, succeed }) => {
+                                                        if (component.id === $wire.__instance.id) {
+                                                            succeed(() => {
+                                                                setTimeout(() => {
+                                                                    isLoadingHover = false;
+                                                                }, 100);
+                                                            });
+                                                        }
+                                                    });
+                                                ">
+                                            <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl blur opacity-0 
+                                                        group-hover/fav-alt:opacity-100 transition-opacity duration-300"></div>
+                                            <div class="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center 
+                                                        shadow-xl transition-all duration-300 group-hover/fav-alt:scale-110 
+                                                        group-hover/fav-alt:shadow-2xl group-hover/fav-alt:bg-white">
+                                                <i class="far fa-heart text-lg text-gray-700 group-hover/fav-alt:text-rose-500
+                                                          transition-all duration-300"
+                                                   x-show="!isLoadingHover"></i>
+                                            </div>
+                                            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white 
+                                                        text-xs font-medium rounded opacity-0 group-hover/fav-alt:opacity-100 
+                                                        transition-all duration-300 whitespace-nowrap">
+                                                Adicionar aos favoritos
+                                                <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                                            </div>
+                                            <div class="absolute inset-0 bg-rose-600/90 backdrop-blur-sm rounded-2xl 
+                                                        flex items-center justify-center transition-opacity duration-300"
+                                                 :class="{ 'opacity-100': isLoadingHover, 'opacity-0': !isLoadingHover }"
+                                                 x-show="isLoadingHover">
+                                                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            </div>
+                                        </button>
                                     </div>
-                                </button>
+                                @endif
 
                                 {{-- Visualizar --}}
-                                <a href="{{ route('produto.detalhe', $produto->slug) }}"
-                                   class="flex-1 group/view relative overflow-hidden">
+                                <div class="flex-1 group/view relative overflow-hidden">
                                     <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white 
                                                 dark:from-gray-800 dark:to-gray-900 border border-gray-300/50 
                                                 dark:border-gray-600/50 rounded-xl transition-all duration-300 
                                                 group-hover/view:border-blue-300 dark:group-hover/view:border-blue-500/50"></div>
-                                    <div class="relative py-3 rounded-xl flex items-center justify-center gap-2 
-                                                transition-all duration-300 group-hover/view:scale-105">
+                                    <a href="{{ route('produto.detalhe', $produto->slug) }}"
+                                       class="relative py-3 rounded-xl flex items-center justify-center gap-2 
+                                               transition-all duration-300 group-hover/view:scale-105 block w-full h-full">
                                         <i class="fas fa-eye text-lg text-gray-600 dark:text-gray-400 
                                                   group-hover/view:text-blue-500 transition-colors duration-300"></i>
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                             Detalhes
                                         </span>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Entrega estimada --}}
-                        {{--
-                        <div class="pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-                            <div class="flex items-center justify-between text-sm">
-                                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                    <i class="fas fa-shipping-fast text-blue-500"></i>
-                                    <span>Entrega em</span>
+                                    </a>
                                 </div>
-                                <span class="font-medium text-gray-900 dark:text-white">2-3 dias úteis</span>
                             </div>
                         </div>
-                        --}}
                     </div>
                 </div>
             </div>
@@ -459,6 +571,34 @@
         animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
     }
     
+    @keyframes pulse-fast {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+    }
+    
+    .animate-pulse-fast {
+        animation: pulse-fast 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    
     /* Melhorias visuais gerais */
     .line-clamp-2 {
         display: -webkit-box;
@@ -469,7 +609,7 @@
     
     .bg-clip-text {
         -webkit-background-clip: text;
-            background-clip: text;
+        background-clip: text;
     }
     
     .backdrop-blur-sm {

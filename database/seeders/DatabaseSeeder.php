@@ -4,6 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+use Database\Seeders\UsuariosPadrao\{
+    GerenteSeeder,
+    OperadorSeeder,
+    SuporteSeeder,
+};
+
 class DatabaseSeeder extends Seeder
 {
     public function run()
@@ -18,10 +24,16 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MarcaSeeder::class);
         $this->call(BannerSeeder::class);
+        $this->call(ConfiguracoesSeeder::class);
 
         // 2. Criar administrador principal
-        $this->command->info('👑 Criando administrador...');
-        $this->call(AdminSeeder::class);
+        $this->command->info('👑 Criando administrador e outros usuarios Padrao...');
+        $this->call([
+            AdminSeeder::class,
+            GerenteSeeder::class,
+            OperadorSeeder::class,
+            SuporteSeeder::class, 
+        ]);
         $this->command->line('');
 
         // 3. Criar usuários

@@ -26,3 +26,5 @@ import './services/eventService';
 // Importar integrações
 import './integrations/livewire';
 import './theme.js'
+import './ajax-navigation.js';
+import './auto-intercept';

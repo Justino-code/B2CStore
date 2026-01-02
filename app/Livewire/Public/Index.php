@@ -9,30 +9,17 @@ use App\Models\{
     Review,
     Usuario,
 };
+
+use App\Traits\{
+    HasCartActions,
+    HasFavorites,
+};
+
 use Illuminate\Support\Facades\Cache;
 
 class Index extends Component
 {
-    public function addToCart($produtoId)
-    {
-        $this->dispatch('add-to-cart', produtoId: $produtoId);
-    }
-
-    public function addToFavorites($produtoId)
-    {
-        if (auth()->check()) {
-            auth()->user()->favoritos()->toggle($produtoId);
-            $this->dispatch('notify', 
-                type: 'success',
-                message: 'Produto atualizado nos favoritos!'
-            );
-        } else {
-            $this->dispatch('notify',
-                type: 'warning',
-                message: 'Faça login para adicionar aos favoritos!'
-            );
-        }
-    }
+    use HasCartActions, HasFavorites;
 
     public function clientesSatisfeitos(){
         $totalClientes = Usuario::where('role', 'cliente')->count();

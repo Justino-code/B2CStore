@@ -1,137 +1,207 @@
-<nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+{{-- components/navbar/admin.blade.php --}}
+<nav class="bg-white dark:bg-gray-800 shadow" x-data="navbarState()" x-init="init()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <!-- Left side -->
-            <div class="flex">
+            <!-- Left Section -->
+            <div class="flex items-center">
+                <!-- Mobile Sidebar Button -->
+                <button @click="window.openSidebar()" 
+                        class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
                 <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center">
-                        <x-application-logo class="block h-8 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                        <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
-                            B2CStore Admin
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden sm:ml-8 sm:flex sm:space-x-4">
-                    <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        Dashboard
-                    </x-nav-link>
-
-                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.products.*')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                        </svg>
-                        Produtos
-                    </x-nav-link>
-
-                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.categories.*')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                        Categorias
-                    </x-nav-link>
-
-                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.orders.*')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
-                        Pedidos
-                    </x-nav-link>
-
-                    <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.users.*')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-6.5a6 6 0 01-6 6"/>
-                        </svg>
-                        Usuários
-                    </x-nav-link>
-                </div>
+                <a href="{{ route('home') }}" 
+                   class="flex items-center ml-2 lg:ml-0 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('home') }}')">
+                    <x-application-logo class="block h-8 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <span class="ml-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                        B2CStore
+                    </span>
+                </a>
             </div>
 
-            <!-- Right side -->
-            <div class="flex items-center">
-                <!-- Dark Mode Toggle -->
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <!-- Theme Toggle -->
                 <x-theme-toggle-button />
 
                 <!-- Notifications -->
-                <button class="ml-3 p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 relative transition-colors duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                    <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-                </button>
-
-                <!-- User Menu -->
-                <div class="ml-3 relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <span class="sr-only">Abrir menu do usuário</span>
-                        <img class="h-8 w-8 rounded-full"
-                             src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=1D4ED8&color=fff' }}"
-                             alt="{{ Auth::user()->name }}">
-                        <span class="ml-2 hidden md:block text-gray-700 dark:text-gray-300 transition-colors duration-200">
-                            {{ Auth::user()->name }}
-                        </span>
+                <div class="relative" x-data="{ openNotifications: false }" @click.outside="openNotifications = false">
+                    <button @click="openNotifications = !openNotifications" 
+                            class="relative p-2 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        @php
+                            use App\Enum\Role;
+                            $user = auth()->user();
+                            $userRole = $user->role ?? null;
+                            
+                            $pedidosCount = 0;
+                            if (in_array($userRole, [Role::ADMIN->value, Role::GERENTE->value, Role::OPERADOR->value, Role::SUPORTE->value])) {
+                                $pedidosCount = \App\Models\Pedido::whereIn('status', ['pendente'])->count();
+                            }
+                        @endphp
+                        @if($pedidosCount > 0)
+                            <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+                        @endif
                     </button>
 
-                    <div x-show="open" @click.away="open = false" x-transition
-                         class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 transition-colors duration-300">
-                        <a href="{{ route('home') }}"
-                           class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                            Meu Perfil
-                        </a>
-                        <a href="{{ route('home') }}"
-                           class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                            Configurações
-                        </a>
-                        <div class="border-t border-gray-200 dark:border-gray-700"></div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                                Sair
-                            </button>
-                        </form>
+                    <!-- Notifications Dropdown -->
+                    <div x-show="openNotifications" 
+                         x-transition
+                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                        <div class="p-4">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Notificações</h3>
+                            <div class="space-y-3 max-h-60 overflow-y-auto" id="notifications-list">
+                                @if($pedidosCount > 0)
+                                <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                                     @click.prevent="openNotifications = false; ajaxNavigate('{{ route('admin.pedidos.index') }}')">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">Novo pedido recebido</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Há 5 minutos</p>
+                                    </div>
+                                </div>
+                                @else
+                                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                                    Nenhuma notificação
+                                </p>
+                                @endif
+                            </div>
+                            <a href="{{ route('admin.pedidos.index') }}" 
+                               class="block text-center text-sm text-blue-600 dark:text-blue-400 hover:underline mt-3 cursor-pointer"
+                               @click.prevent="openNotifications = false; ajaxNavigate('{{ route('admin.pedidos.index') }}')">
+                                Ver todos os pedidos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="relative" x-data="{ openUserMenu: false }" @click.outside="openUserMenu = false">
+                    <button @click="openUserMenu = !openUserMenu" 
+                            class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {{ substr(Auth::user()->nome, 0, 1) }}
+                        </div>
+                        <div class="hidden md:block text-left">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ explode(' ',Auth::user()->nome)[0] }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ Auth::user()->role }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-500" :class="{ 'rotate-180': openUserMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="openUserMenu" 
+                         x-transition
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                        <div class="py-1">
+                            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->nome }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</p>
+                            </div>
+                            
+                            
+                            <a href="{{ route('admin.perfil') }}" 
+                               class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                               @click.prevent="openUserMenu = false; ajaxNavigate('{{ route('admin.perfil') }}')">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Meu Perfil
+                            </a>
+                          
+
+                            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Mobile menu button -->
-            <div class="flex items-center sm:hidden">
-                <button @click="open = !open" x-data="{ open: false }" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                    <span class="sr-only">Abrir menu principal</span>
-                    <svg class="block h-6 w-6" :class="{'hidden': open, 'block': !open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                    <svg class="hidden h-6 w-6" :class="{'block': open, 'hidden': !open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile menu -->
-    <div class="sm:hidden" x-show="open" @click.away="open = false" x-transition>
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.dashboard')">
-                Dashboard
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="{{ route('home') }}" :active="request()->routeIs('admin.products.*')">
-                Produtos
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="" :active="request()->routeIs('admin.categories.*')">
-                Categorias
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="" :active="request()->routeIs('admin.orders.*')">
-                Pedidos
-            </x-responsive-nav-link>
-            <x-responsive-nav-link href="" :active="request()->routeIs('admin.users.*')">
-                Usuários
-            </x-responsive-nav-link>
         </div>
     </div>
 </nav>
+
+@push('scripts')
+<script>
+    window.navbarState = function() {
+        return {
+            init() {
+                this.syncWithGlobal();
+            },
+            
+            syncWithGlobal() {
+                if (!window.ajaxNavigate) {
+                    window.ajaxNavigate = this.ajaxNavigate.bind(this);
+                }
+            },
+            
+            ajaxNavigate(url) {
+                // Fechar todos os dropdowns abertos
+                this.closeAllDropdowns();
+                
+                // Usar a mesma função de navegação da sidebar se disponível
+                if (typeof window.sidebarState !== 'undefined' && typeof window.sidebarState().ajaxNavigate === 'function') {
+                    window.sidebarState().ajaxNavigate(url);
+                } else if (typeof Livewire !== 'undefined' && typeof Livewire.navigate === 'function') {
+                    Livewire.navigate(url, {
+                        preserveScroll: true,
+                        preserveState: true
+                    });
+                } else {
+                    // Fallback para navegação normal
+                    window.location.href = url;
+                }
+            },
+            
+            closeAllDropdowns() {
+                // Fechar dropdowns do Alpine
+                const dropdowns = document.querySelectorAll('[x-data*="open"]');
+                dropdowns.forEach(dropdown => {
+                    if (dropdown.__x && dropdown.__x.$data && dropdown.__x.$data.open !== undefined) {
+                        dropdown.__x.$data.open = false;
+                    }
+                });
+            }
+        };
+    };
+</script>
+
+@push('styles')
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    /* Estilo para links com navegação AJAX */
+    [@click*="ajaxNavigate"] {
+        transition: all 0.2s ease;
+    }
+    
+    [@click*="ajaxNavigate"]:hover {
+        opacity: 0.9;
+    }
+</style>
+@endpush
+@endpush

@@ -2,8 +2,13 @@
 
 @php
     $imagem = $produto->imagens->first()?->url_imagem;
-    $isFavorito = auth()->check() && auth()->user()->favoritos->contains($produto->id_produto);
     $desconto = calculateDiscountPercentage($produto->preco, $produto->preco_promocional);
+    
+    // Verifica se está nos favoritos - APENAS para clientes
+    $isFavorito = false;
+    if (auth()->check() && auth()->user()->role === 'cliente') {
+        $isFavorito = $this->isFavorite($produto->id_produto);
+    }
 @endphp
 
 <div class="group relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 
@@ -12,15 +17,98 @@
             before:absolute before:inset-0 before:bg-gradient-to-br before:from-blue-500/0 before:via-indigo-500/0 before:to-purple-500/0
             before:group-hover:from-blue-500/5 before:group-hover:via-indigo-500/3 before:group-hover:to-purple-500/5
             before:transition-all before:duration-700 cursor-pointer"
-     x-data="{ showActions: false }"
+     x-data="{ 
+        showActions: false,
+        isFavorito: {{ $isFavorito ? 'true' : 'false' }},
+        showFavButton: {{ $isFavorito ? 'true' : 'false' }},
+        isLoading: false,
+        isLoadingHover: false
+     }"
      @mouseenter="showActions = true"
      @mouseleave="showActions = false"
+     @favorito-atualizado.window="
+        if ($event.detail.produtoId === {{ $produto->id_produto }}) {
+            isFavorito = $event.detail.acao === 'adicionado';
+            showFavButton = isFavorito;
+            // Força reação do Alpine
+            $nextTick(() => {
+                // Atualiza qualquer estado necessário
+            });
+        }
+     "
      onclick="window.location.href='{{ route('produto.detalhe', $produto->slug) }}'">
 
     {{-- Efeito de brilho sutil --}}
     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 
                 group-hover:from-blue-500/10 group-hover:via-indigo-500/8 group-hover:to-purple-500/10 
                 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700 -z-10"></div>
+
+    {{-- Botão Favorito APENAS quando o produto está nos favoritos --}}
+    <div class="absolute top-4 right-4 z-30"
+         x-show="showFavButton"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-90"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-90">
+        <button wire:click="addToFavorites({{ $produto->id_produto }})"
+                wire:loading.attr="disabled"
+                :disabled="isLoading"
+                @click="isLoading = true; $event.stopPropagation();"
+                class="relative group/fav-heart overflow-hidden"
+                x-init="
+                    // Quando a ação do Livewire terminar, remove o loading
+                    Livewire.hook('commit', ({ component, commit, succeed }) => {
+                        if (component.id === $wire.__instance.id) {
+                            succeed(() => {
+                                setTimeout(() => {
+                                    isLoading = false;
+                                }, 100);
+                            });
+                        }
+                    });
+                ">
+            
+            {{-- Efeito de fundo --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-pink-500/0 
+                        group-hover/fav-heart:from-rose-500/20 group-hover/fav-heart:to-pink-500/20 
+                        rounded-full blur transition-all duration-500"></div>
+            
+            {{-- Ícone do coração --}}
+            <div class="relative w-10 h-10 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm 
+                        flex items-center justify-center shadow-lg 
+                        transition-all duration-300 group-hover/fav-heart:scale-110 
+                        group-hover/fav-heart:shadow-xl group-hover/fav-heart:bg-white dark:group-hover/fav-heart:bg-gray-700
+                        ring-2 ring-rose-500/40 shadow-rose-500/20">
+                
+                {{-- Coração preenchido --}}
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-heart text-lg text-rose-500"
+                       :class="{ 'animate-pulse-fast': !isLoading }"
+                       x-show="!isLoading"></i>
+                </div>
+                
+                {{-- Loader durante a ação --}}
+                <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+                     :class="{ 'opacity-100': isLoading, 'opacity-0': !isLoading }"
+                     x-show="isLoading">
+                    <div class="w-4 h-4 border-2 border-rose-500/30 border-t-rose-500 
+                                rounded-full animate-spin"></div>
+                </div>
+            </div>
+            
+            {{-- Tooltip --}}
+            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-2 py-1.5 
+                        bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium rounded 
+                        opacity-0 group-hover/fav-heart:opacity-100 transition-all duration-300 
+                        whitespace-nowrap pointer-events-none">
+                Remover dos favoritos
+                <div class="absolute -top-1.5 left-1/2 transform -translate-x-1/2 w-2 h-2 
+                            bg-gray-900 dark:bg-gray-700 rotate-45"></div>
+            </div>
+        </button>
+    </div>
 
     {{-- Badges superiores --}}
     <div class="absolute top-4 left-4 z-20 flex flex-col gap-2">
@@ -129,26 +217,54 @@
                 </button>
             @endif
 
-            {{-- Botão Favorito --}}
-            <button wire:click="addToFavorites({{ $produto->id_produto }})"
-                    class="relative group/fav overflow-hidden z-20"
-                    onclick="event.stopPropagation();">
-                <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl blur opacity-0 
-                            group-hover/fav:opacity-100 transition-opacity duration-300"></div>
-                <div class="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center 
-                            shadow-xl transition-all duration-300 group-hover/fav:scale-110 
-                            group-hover/fav:shadow-2xl group-hover/fav:bg-white">
-                    <i class="fas fa-heart text-lg transition-all duration-300 
-                              {{ $isFavorito ? 'text-rose-500 animate-pulse' : 'text-gray-700' }}
-                              group-hover/fav:text-rose-500"></i>
+            {{-- Botão para ADICIONAR aos favoritos (só aparece no hover quando não está nos favoritos) --}}
+            @if(auth()->check() && auth()->user()->role === 'cliente')
+                <div x-show="!isFavorito && showActions"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-90"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-90">
+                    <button wire:click="addToFavorites({{ $produto->id_produto }})"
+                            wire:loading.attr="disabled"
+                            class="relative group/fav-alt overflow-hidden z-20"
+                            @click="isLoadingHover = true; $event.stopPropagation();"
+                            x-init="
+                                Livewire.hook('commit', ({ component, commit, succeed }) => {
+                                    if (component.id === $wire.__instance.id) {
+                                        succeed(() => {
+                                            setTimeout(() => {
+                                                isLoadingHover = false;
+                                            }, 100);
+                                        });
+                                    }
+                                });
+                            ">
+                        <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl blur opacity-0 
+                                    group-hover/fav-alt:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center 
+                                    shadow-xl transition-all duration-300 group-hover/fav-alt:scale-110 
+                                    group-hover/fav-alt:shadow-2xl group-hover/fav-alt:bg-white">
+                            <i class="far fa-heart text-lg text-gray-700 group-hover/fav-alt:text-rose-500
+                                      transition-all duration-300"
+                               x-show="!isLoadingHover"></i>
+                        </div>
+                        <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white 
+                                    text-xs font-medium rounded opacity-0 group-hover/fav-alt:opacity-100 
+                                    transition-all duration-300 whitespace-nowrap">
+                            Adicionar aos favoritos
+                            <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                        </div>
+                        <div class="absolute inset-0 bg-rose-600/90 backdrop-blur-sm rounded-2xl 
+                                    flex items-center justify-center transition-opacity duration-300"
+                             :class="{ 'opacity-100': isLoadingHover, 'opacity-0': !isLoadingHover }"
+                             x-show="isLoadingHover">
+                            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        </div>
+                    </button>
                 </div>
-                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white 
-                            text-xs font-medium rounded opacity-0 group-hover/fav:opacity-100 
-                            transition-all duration-300 whitespace-nowrap">
-                    {{ $isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
-                    <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                </div>
-            </button>
+            @endif
         </div>
 
         {{-- Status estoque --}}
@@ -287,6 +403,34 @@
 
 @push('styles')
 <style>
+    @keyframes pulse-fast {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+    }
+    
+    .animate-pulse-fast {
+        animation: pulse-fast 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    
     .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -296,7 +440,7 @@
     
     .bg-clip-text {
         -webkit-background-clip: text;
-            background-clip: text;
+        background-clip: text;
     }
     
     .aspect-square {
@@ -305,24 +449,6 @@
     
     .backdrop-blur-sm {
         backdrop-filter: blur(4px);
-    }
-    
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.7;
-        }
-    }
-    
-    .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    /* Cursor pointer para indicar que é clicável */
-    .cursor-pointer {
-        cursor: pointer;
     }
 </style>
 @endpush

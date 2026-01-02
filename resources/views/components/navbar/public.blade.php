@@ -1,10 +1,11 @@
 {{-- components/navbar/public.blade.php --}}
+
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 shadow-lg transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <!-- Logo -->
             <div class="flex items-center">
-                <a href="{{ url('/') }}" class="flex items-center">
+                <a href="{{ url('/') }}" class="flex items-center" @click.prevent="ajaxNavigate('{{ url('/') }}')">
                     <x-application-logo class="block h-8 w-auto fill-current text-gray-800 dark:text-gray-200" />
                     <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
                         {{ config('app.name', 'Laravel') }}
@@ -14,16 +15,24 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ route('home') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                <a href="{{ route('home') }}" 
+                   class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('home') }}')">
                     Início
                 </a>
-                <a href="{{ route('produtos') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                <a href="{{ route('produtos') }}" 
+                   class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('produtos') }}')">
                     Produtos
                 </a>
-                <a href="{{ route('categorias') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                <a href="{{ route('categorias') }}" 
+                   class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('categorias') }}')">
                     Categorias
                 </a>
-                <a href="{{ route('sobre') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                <a href="{{ route('sobre') }}" 
+                   class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('sobre') }}')">
                     Sobre
                 </a>
 
@@ -35,12 +44,12 @@
                     @auth
                         <!-- Carrinho (apenas para clientes) -->
                         @if(auth()->user()->role === 'cliente')
-                            <a href="{{ route('carrinho') }}" 
-                               class="relative p-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 group">
+                            <a href="{{ route('cliente.carrinho') }}" 
+                               class="relative p-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 group cursor-pointer"
+                               @click.prevent="ajaxNavigate('{{ route('cliente.carrinho') }}')">
                                 <i class="fas fa-shopping-cart text-lg"></i>
                                 <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                    {{-- Adicione aqui a contagem de itens do carrinho se tiver --}}
-                                    0
+                                    {{ auth()->user()->quantidadeItensCarrinho() }}
                                 </span>
                                 <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-900 text-white 
                                             text-xs font-medium rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
@@ -71,20 +80,26 @@
                                  style="display: none;">
                                 <div class="py-1">
                                     <!-- Dashboard (para todos os usuários autenticados) -->
-                                    <a href="{{ route('dashboard') }}" 
-                                       class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                     @php
+                                        $route = auth()->user()->role === 'cliente' ? 'cliente' : 'admin';
+                                        $route = $route.'.dashboard';
+                                     @endphp
+                                    <a href="{{ route($route) }}" 
+                                       class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                       @click.prevent="ajaxNavigate('{{ route($route) }}'); openUserMenu = false">
                                         <i class="fas fa-tachometer-alt mr-2 text-blue-500"></i>
                                         Dashboard
                                     </a>
                                     
                                     <!-- Carrinho (apenas para clientes) -->
                                     @if(auth()->user()->role === 'cliente')
-                                        <a href="{{ route('carrinho') }}" 
-                                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                        <a href="{{ route('cliente.carrinho') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                           @click.prevent="ajaxNavigate('{{ route('cliente.carrinho') }}'); openUserMenu = false">
                                             <i class="fas fa-shopping-cart mr-2 text-blue-500"></i>
                                             Carrinho
                                             <span class="ml-auto bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                                0
+                                                {{ auth()->user()->quantidadeItensCarrinho() }}
                                             </span>
                                         </a>
                                     @endif
@@ -93,7 +108,8 @@
                                     @if(in_array(auth()->user()->role, ['admin', 'funcionario']))
                                         <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                         <a href="{{ route('admin.dashboard') }}" 
-                                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                           @click.prevent="ajaxNavigate('{{ route('admin.dashboard') }}'); openUserMenu = false">
                                             <i class="fas fa-cogs mr-2 text-purple-500"></i>
                                             Admin
                                         </a>
@@ -115,11 +131,13 @@
                     @else
                         <!-- Links para não autenticados -->
                         <a href="{{ route('login') }}" 
-                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route('login') }}')">
                             Login
                         </a>
                         <a href="{{ route('register') }}" 
-                           class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">
+                           class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route('register') }}')">
                             Registrar
                         </a>
                     @endauth
@@ -131,8 +149,9 @@
                 <!-- Carrinho Mobile (apenas para clientes autenticados) -->
                 @auth
                     @if(auth()->user()->role === 'cliente')
-                        <a href="{{ route('carrinho') }}" 
-                           class="relative p-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+                        <a href="{{ route('cliente.carrinho') }}" 
+                           class="relative p-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route('cliente.carrinho') }}')">
                             <i class="fas fa-shopping-cart text-lg"></i>
                             <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                 0
@@ -159,19 +178,23 @@
         <div x-show="open" @click.away="open = false" x-transition class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1">
                 <a href="{{ route('home') }}" 
-                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('home') }}'); open = false">
                     Início
                 </a>
                 <a href="{{ route('produtos') }}" 
-                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('produtos') }}'); open = false">
                     Produtos
                 </a>
                 <a href="{{ route('categorias') }}" 
-                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('categorias') }}'); open = false">
                     Categorias
                 </a>
                 <a href="{{ route('sobre') }}" 
-                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                   class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                   @click.prevent="ajaxNavigate('{{ route('sobre') }}'); open = false">
                     Sobre
                 </a>
 
@@ -191,15 +214,17 @@
                         </div>
 
                         <!-- Menu Links Mobile -->
-                        <a href="{{ route('dashboard') }}" 
-                           class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <a href="{{ route($route) }}" 
+                           class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route($route) }}'); open = false">
                             <i class="fas fa-tachometer-alt mr-2 text-blue-500 w-5 text-center"></i>
                             Dashboard
                         </a>
 
                         @if(auth()->user()->role === 'cliente')
-                            <a href="{{ route('carrinho') }}" 
-                               class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <a href="{{ route('cliente.carrinho') }}" 
+                               class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                               @click.prevent="ajaxNavigate('{{ route('cliente.carrinho') }}'); open = false">
                                 <i class="fas fa-shopping-cart mr-2 text-blue-500 w-5 text-center"></i>
                                 Carrinho
                                 <span class="ml-auto bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -210,7 +235,8 @@
 
                         @if(in_array(auth()->user()->role, ['admin', 'funcionario']))
                             <a href="{{ route('admin.dashboard') }}" 
-                               class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                               class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                               @click.prevent="ajaxNavigate('{{ route('admin.dashboard') }}'); open = false">
                                 <i class="fas fa-cogs mr-2 text-purple-500 w-5 text-center"></i>
                                 Admin
                             </a>
@@ -228,11 +254,13 @@
                     @else
                         <!-- Links para não autenticados -->
                         <a href="{{ route('login') }}" 
-                           class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200">
+                           class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route('login') }}'); open = false">
                             Login
                         </a>
                         <a href="{{ route('register') }}" 
-                           class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors duration-200">
+                           class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors duration-200 cursor-pointer"
+                           @click.prevent="ajaxNavigate('{{ route('register') }}'); open = false">
                             Registrar
                         </a>
                     @endauth
@@ -241,3 +269,22 @@
         </div>
     </div>
 </nav>
+
+@push('scripts')
+<script>
+    // Função para navegação AJAX
+    function ajaxNavigate(url) {
+        // Verificar se Livewire está disponível
+        if (typeof Livewire !== 'undefined' && typeof Livewire.navigate === 'function') {
+            // Navegação via Livewire (AJAX)
+            Livewire.navigate(url, {
+                preserveScroll: true,
+                preserveState: true
+            });
+        } else {
+            // Fallback para navegação normal
+            window.location.href = url;
+        }
+    }
+</script>
+@endpush

@@ -13,9 +13,16 @@ use Livewire\Attributes\Layout;
 
 use Illuminate\Support\Facades\DB;
 
+use App\Traits\{
+    HasCartActions,
+    HasFavorites,
+};
+
 #[Layout('components.layouts.public')]
 class ProdutoShow extends Component
 {
+    use HasCartActions, HasFavorites;
+
     public $produto;
     public $slug;
     public $quantidade = 1;
@@ -35,10 +42,18 @@ class ProdutoShow extends Component
     public function mount($slug)
     {
         $this->slug = $slug;
-        $this->carregarProduto();
+
+        try {
+            $this->carregarProduto();
+            $this->isFavorite = $this->isFavorite($this->produto->id_produto);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Produto não encontrado → redireciona
+            return redirect()->route('unauthorized');
+        }
+
         $this->carregarReviews();
         $this->carregarProdutosRelacionados();
-        
+
         if ($this->produto->imagens->isNotEmpty()) {
             $this->imagemSelecionada = $this->produto->imagens->first()->url_imagem;
         }
@@ -151,56 +166,6 @@ class ProdutoShow extends Component
     public function selecionarVariacao($variacao)
     {
         $this->variacaoSelecionada = $variacao;
-    }
-
-    public function addToCart()
-    {
-        if ($this->produto->estoque <= 0) {
-            $this->dispatch('notify', 
-                type: 'error',
-                message: 'Este produto está esgotado.'
-            );
-            return;
-        }
-
-        if ($this->quantidade > $this->produto->estoque) {
-            $this->dispatch('notify', 
-                type: 'warning',
-                message: 'Quantidade solicitada excede o estoque disponível.'
-            );
-            return;
-        }
-
-        $this->dispatch('add-to-cart', 
-            produtoId: $this->produto->id_produto,
-            quantidade: $this->quantidade,
-            variacao: $this->variacaoSelecionada
-        );
-
-        $this->dispatch('notify', 
-            type: 'success',
-            message: 'Produto adicionado ao carrinho!'
-        );
-    }
-
-    public function addToFavorites()
-    {
-        if (auth()->check()) {
-            auth()->user()->favoritos()->toggle($this->produto->id_produto);
-            
-            $isFavorito = auth()->user()->favoritos->contains($this->produto->id_produto);
-            $mensagem = $isFavorito ? 'Produto adicionado aos favoritos!' : 'Produto removido dos favoritos!';
-            
-            $this->dispatch('notify', 
-                type: 'success',
-                message: $mensagem
-            );
-        } else {
-            $this->dispatch('notify',
-                type: 'warning',
-                message: 'Faça login para adicionar aos favoritos!'
-            );
-        }
     }
 
     public function openReviewModal()

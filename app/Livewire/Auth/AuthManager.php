@@ -52,11 +52,14 @@ class AuthManager extends Component
             );
             
             // Redirecionar após login bem-sucedido
-            if(Auth::user()->role === 'cliente'){
-                $this->redirect(route('perfil'), navigate: true);
+            if(Auth::user()->isCliente){
+                $this->redirect(route('cliente.dashboard'), navigate: true);
             
-            }else{
-                $this->redirect(route('dashboard'), navigate: true);
+            }elseif(Auth::user()->isAdmin || Auth::user()->isGerente){
+                 $this->redirect(route('admin.dashboard'), navigate: true);
+            }
+            else{
+                $this->redirect(route('admin.perfil'), navigate: true);
             }
             
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -66,12 +69,14 @@ class AuthManager extends Component
                 message: 'Erro ao realizar login. Tente novamente.'
             );
             throw $e;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->isLoading = false;
             $this->dispatch('notify', 
                 type: 'error', 
                 message: 'Erro ao realizar login. Tente novamente.'
             );
+
+            dd($e);
         }
     }
 

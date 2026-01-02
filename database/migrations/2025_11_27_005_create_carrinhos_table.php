@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('carrinhos', function (Blueprint $table) {
             $table->id('id_carrinho');
             $table->foreignId('id_usuario')->constrained('usuarios', 'id_usuario')->unique();
+            $table->decimal('frete', 10, 2)->default(0);
             $table->timestamps();
         });
     }

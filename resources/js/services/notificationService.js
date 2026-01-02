@@ -82,36 +82,43 @@ class NotificationService {
     }
 
     showConfirmation(options = {}) {
-        if (!this.swal) {
-            this.initializeSwal();
-        }
-
-        const theme = getThemeConfig();
-
-        const config = {
-            title: options.title || 'Tem certeza?',
-            text: options.message || 'Esta ação não pode ser desfeita.',
-            icon: options.icon || 'warning',
-            showCancelButton: true,
-            confirmButtonText: options.confirmText || 'Sim, continuar',
-            cancelButtonText: options.cancelText || 'Cancelar',
-            confirmButtonColor: theme.colors.primary,
-            cancelButtonColor: theme.colors.secondary,
-            customClass: {
-                popup: 'rounded-xl shadow-xl',
-                htmlContainer: theme.isDark ? 'text-gray-300' : 'text-gray-700',
-                confirmButton: theme.isDark
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-blue-500 hover:bg-blue-600 text-white',
-                cancelButton: theme.isDark
-                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-            },
-            ...options
-        };
-
-        return this.swal.fire(config);
+    if (!this.swal) {
+        this.initializeSwal();
     }
+
+    const theme = getThemeConfig();
+
+    // Extrair opções personalizadas ou usar valores padrão
+    const {
+        title = 'Tem certeza?',
+        text = 'Esta ação não pode ser desfeita.',
+        icon = 'warning',
+        confirmButtonText = 'Sim, continuar',
+        cancelButtonText = 'Cancelar',
+        ...otherOptions
+    } = options;
+
+    const config = {
+        title,
+        text,
+        icon,
+        showCancelButton: true,
+        confirmButtonText,
+        cancelButtonText,
+        confirmButtonColor: theme.colors.primary,
+        cancelButtonColor: theme.colors.secondary,
+        background: theme.colors.background,
+        color: theme.colors.text,
+        customClass: {
+            popup: theme.isDark ? 'dark-swal' : 'light-swal',
+            confirmButton: theme.isDark ? 'dark-confirm-btn' : 'light-confirm-btn',
+            cancelButton: theme.isDark ? 'dark-cancel-btn' : 'light-cancel-btn'
+        },
+        ...otherOptions // Spread other valid SweetAlert2 options
+    };
+
+    return this.swal.fire(config);
+}
 }
 
 // Criar instância global
