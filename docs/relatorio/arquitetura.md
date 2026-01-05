@@ -1,614 +1,332 @@
-# **4. Arquitetura Técnica e Desenvolvimento do Sistema B2CStore Angola**
+# **4. ENGENHARIA DE SOFTWARE**
 
-## **4.1. Arquitetura Geral do Sistema**
+## **4.1. Arquitetura do Sistema**
 
-### **4.1.1. Visão Geral da Arquitetura Web-First**
+### **4.1.1. Visão Geral da Arquitetura**
+O B2CStore segue uma arquitetura **MVC (Model-View-Controller)** implementada através do framework Laravel, com separação clara de responsabilidades entre camadas de apresentação, lógica de negócio e persistência de dados. A arquitetura foi escolhida por oferecer:
 
-O B2CStore segue uma arquitetura monolítica web-first, otimizada para o contexto tecnológico angolano:
+- **Manutenibilidade:** Separação clara de responsabilidades
+- **Testabilidade:** Componentes isolados facilitam testes unitários
+- **Escalabilidade:** Possibilidade de adicionar microsserviços futuramente
+- **Produtividade:** Laravel fornece convenções que aceleram o desenvolvimento
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Camada de Apresentação                 │
-│                 (Livewire + Blade + Alpine.js)           │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  Aplicação Web Responsiva (PWA)                  │  │
-│  │  • Frontend Público                              │  │
-│  │  • Área do Cliente                              │  │
-│  │  • Painel Administrativo                        │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────┐
-│              Camada de Aplicação (Laravel)              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │ Contro-  │  │  Model   │  │  View    │              │
-│  │ llers    │  │  (ORM)   │  │ (Blade)  │              │
-│  └──────────┘  └──────────┘  └──────────┘              │
-└─────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────┐
-│                 Camada de Dados                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │  MySQL   │  │  Redis   │  │  File    │              │
-│  │  Banco   │  │  Cache   │  │ Storage  │              │
-│  └──────────┘  └──────────┘  └──────────┘              │
-└─────────────────────────────────────────────────────────┘
-```
-
-### **4.1.2. Princípios de Design Arquitetural**
-
-**Princípios Adotados para Angola:**
-1. **Web-First:** Aplicação web responsiva como único frontend
-2. **PWA Capable:** Funcionalidades de Progressive Web App
-3. **Offline-First:** Funcionalidade básica sem conexão via Service Workers
-4. **Low-Bandwidth Optimized:** Minimização de recursos e cache agressivo
-5. **Simple Monolith:** Arquitetura monolítica para reduzir complexidade
-
-## **4.2. Stack Tecnológico**
-
-### **4.2.1. Backend Stack**
-
-**Core Framework:**
-- **PHP 8.2:** Performance melhorada, tipagem estrita
-- **Laravel 10:** Framework MVC completo
-- **Livewire 3:** Componentes reativos full-stack
-- **Laravel Breeze:** Scaffolding de autenticação
-
-**Banco de Dados:**
-- **MySQL 8.0:** Banco de dados relacional principal
-- **Redis 7.0:** Cache, sessões e filas
-- **Laravel File System:** Armazenamento local de imagens
-
-### **4.2.2. Frontend Stack**
-
-**Tecnologias Principais:**
-- **Blade Templates:** Templating server-side do Laravel
-- **Alpine.js 3.0:** Interatividade client-side leve (21KB)
-- **Tailwind CSS 3.0:** Sistema de design utilitário
-- **Vite 4.0:** Build tool moderno e rápido
-
-**Otimizações Especiais:**
-- **Lazy Loading:** Imagens e componentes sob demanda
-- **Service Workers:** Cache offline e atualizações em background
-- **Critical CSS:** CSS crítico inline para renderização rápida
-- **Font Optimization:** Fontes locais para reduzir requisições
-
-### **4.2.3. Infraestrutura**
-
-**Requisitos Mínimos:**
-- **PHP:** 8.2+ com OPcache habilitado
-- **Servidor Web:** Nginx 1.18+ ou Apache 2.4+
-- **Banco de Dados:** MySQL 8.0+ ou MariaDB 10.4+
-- **Memória:** 1GB RAM mínimo, 2GB recomendado
-- **Storage:** 10GB SSD mínimo
-
-**Otimizações para Angola:**
-- **CDN Regional:** Cloudflare com cache em África
-- **Compressão:** Gzip/Brotli para todos os assets
-- **SSL:** HTTPS obrigatório para todas as páginas
-- **Backup Automático:** Diário para servidores locais
-
-## **4.3. Estrutura do Projeto Laravel**
-
-### **4.3.1. Organização dos Diretórios**
+### **4.1.2. Diagrama de Arquitetura**
 
 ```
-b2cstore/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/           # Controllers administrativos
-│   │   │   ├── Cliente/         # Controllers da área do cliente
-│   │   │   └── Public/          # Controllers públicos
-│   │   └── Middleware/
-│   │       ├── CheckRole.php    # Middleware de verificação de roles
-│   │       └── AngolaLocale.php # Middleware de localização
-│   ├── Livewire/
-│   │   ├── Public/              # Componentes públicos
-│   │   ├── Cliente/             # Componentes da área do cliente
-│   │   ├── Admin/               # Componentes administrativos
-│   │   └── Carrinho/            # Componentes do carrinho
-│   ├── Models/
-│   │   ├── Usuario.php          # Modelo de usuário com roles
-│   │   ├── Produto.php          # Modelo de produto
-│   │   ├── Pedido.php           # Modelo de pedido
-│   │   └── ...                  # Outros modelos
-│   └── Services/
-│       ├── Pagamento/
-│       │   ├── MpesaService.php # Serviço M-Pesa Angola
-│       │   └── CodService.php   # Serviço Cash on Delivery
-│       └── Logistica/
-│           └── FreteService.php # Cálculo de fretes angolanos
-├── resources/
-│   ├── views/
-│   │   ├── layouts/             # Layouts base
-│   │   ├── public/              # Views públicas
-│   │   ├── cliente/             # Views da área do cliente
-│   │   ├── admin/               # Views administrativas
-│   │   └── components/          # Componentes Blade reutilizáveis
-│   └── lang/
-│       ├── pt/                  # Português (default)
-│       ├── pt-ao/               # Português angolano
-│       └── kmb/                 # Kimbundu (básico)
-└── database/
-    ├── migrations/              # Migrations do banco
-    └── seeders/                 # Seeders com dados de Angola
+┌─────────────────────────────────────────────────────────────┐
+│                    Camada de Apresentação                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐  │
+│  │   Blade     │  │  Livewire   │  │    Alpine.js      │  │
+│  │ Templates   │  │ Components  │  │ (Interatividade)  │  │
+│  └─────────────┘  └─────────────┘  └───────────────────┘  │
+│           ↓               ↓                 ↓              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              Tailwind CSS (Estilos)                  │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Camada de Aplicação                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐  │
+│  │ Controllers │←→│   Services  │←→│   Repositories    │  │
+│  │  (Laravel)  │  │  (Lógica)   │  │  (Persistência)   │  │
+│  └─────────────┘  └─────────────┘  └───────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Camada de Persistência                   │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │                  MySQL Database                       │  │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │  │
+│  │  │ Usuários │ │ Produtos │ │ Pedidos  │ │ Outras  │ │  │
+│  │  │          │ │          │ │          │ │ Tabelas │ │  │
+│  │  └──────────┘ └──────────┘ └──────────┘ └─────────┘ │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Camada de Infraestrutura                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐  │
+│  │   Storage   │  │   Cache     │  │     Queue         │  │
+│  │  (Imagens)  │  │   (Redis)   │  │   (Jobs)          │  │
+│  └─────────────┘  └─────────────┘  └───────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### **4.3.2. Estrutura de Rotas**
+## **4.2. Tecnologias e Ferramentas**
+
+### **4.2.1. Stack Tecnológico Completo**
+
+| **Camada**         | **Tecnologia**          | **Versão** | **Propósito**                                                                 |
+|--------------------|-------------------------|------------|-------------------------------------------------------------------------------|
+| **Backend**        | PHP                     | ≥ 8.2      | Linguagem principal do servidor                                              |
+|                    | Laravel                 | ≥ 10.x     | Framework MVC para desenvolvimento rápido e estruturado                       |
+|                    | Livewire                | ≥ 3.x      | Componentes reativos no PHP (simula SPA sem JavaScript pesado)               |
+| **Frontend**       | Alpine.js               | ≥ 3.x      | Interatividade leve no cliente                                                |
+|                    | Tailwind CSS            | ≥ 3.x      | Framework CSS utilitário para design responsivo                              |
+|                    | Vite                    | ≥ 4.x      | Build tool para assets (substitui Webpack)                                   |
+| **Banco de Dados** | MySQL                   | ≥ 8.0      | Sistema de gerenciamento de banco de dados relacional                         |
+|                    | Laravel Eloquent ORM    | -          | Mapeamento objeto-relacional para interação com banco                        |
+| **Cache**          | Redis                   | ≥ 7.x      | Cache de sessões, views e queries frequentes                                 |
+| **Servidor**       | Nginx/Apache            | -          | Servidor web                                                                 |
+|                    | Supervisor              | -          | Gerenciamento de processos (queues)                                          |
+| **Ferramentas**    | Composer                | ≥ 2.x      | Gerenciador de dependências PHP                                              |
+|                    | Node.js + npm           | ≥ 18.x     | Gerenciador de dependências JavaScript e execução do Vite                    |
+|                    | Git                     | -          | Controle de versão                                                           |
+
+### **4.2.2. Justificativa das Escolhas Tecnológicas**
+
+1. **Laravel:** Framework maduro com ecossistema robusto, documentação excelente e comunidade ativa. Ideal para projetos acadêmicos e profissionais.
+
+2. **Livewire + Alpine.js:** Combinação que permite criar interfaces ricas sem a complexidade de frameworks JavaScript pesados como React ou Vue, mantendo a simplicidade do desenvolvimento em PHP.
+
+3. **Tailwind CSS:** Acelera o desenvolvimento frontend através de classes utilitárias, facilita a criação de designs responsivos e suporta nativamente dark mode.
+
+4. **MySQL:** Banco relacional confiável, bem suportado pelo Laravel, com bom desempenho para operações de e-commerce.
+
+## **4.3. Padrões de Projeto Aplicados**
+
+### **4.3.1. Padrões Estruturais**
+- **Repository Pattern:** Separa a lógica de acesso a dados dos controllers
+- **Service Layer:** Encapsula regras de negócio complexas
+- **DTOs (Data Transfer Objects):** Transferência de dados entre camadas
+- **View Models:** Prepara dados para as views
+
+### **4.3.2. Padrões Comportamentais**
+- **Observer:** Para eventos como "pedido criado", "estoque alterado"
+- **Strategy:** Para diferentes métodos de cálculo de frete
+- **Factory:** Para criação de diferentes tipos de usuários/roles
+
+### **4.3.3. Padrões Criacionais**
+- **Service Container:** Injeção de dependências do Laravel
+- **Singleton:** Para serviços como carrinho de compras
+
+## **4.4. Design System e Componentes**
+
+### **4.4.1. Sistema de Design**
+Baseado nos documentos `design.md`, `design_admin.md` e `design_cliente.md`, o sistema implementa:
+
+1. **Atomic Design:** Componentes construídos de átomos → moléculas → organismos → templates → páginas
+2. **Design Tokens:** Cores, tipografia, espaçamento definidos centralmente
+3. **Componentes Reutilizáveis:** Botões, cards, inputs, modais padronizados
+
+### **4.4.2. Componentes Principais**
 
 ```php
-// routes/web.php - Estrutura principal de rotas
-
-// Rotas Públicas
-Route::get('/', [PublicController::class, 'home'])->name('home');
-Route::get('/produtos', [PublicController::class, 'produtos'])->name('produtos.index');
-Route::get('/produto/{slug}', [PublicController::class, 'produtoShow'])->name('produto.show');
-Route::get('/categoria/{slug}', [PublicController::class, 'categoria'])->name('categoria.show');
-
-// Autenticação
-Route::middleware('guest')->group(function () {
-    Route::get('/registrar', [AuthController::class, 'showRegister'])->name('register');
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-});
-
-// Área do Cliente
-Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::get('/dashboard', [ClienteController::class, 'dashboard'])->name('dashboard');
-    Route::get('/pedidos', [ClienteController::class, 'pedidos'])->name('pedidos');
-    Route::get('/carrinho', [CarrinhoController::class, 'index'])->name('carrinho');
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-});
-
-// Área Administrativa
-Route::middleware(['auth', 'check.role:admin,gerente,operador,suporte'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    
-    // Admin e Gerente
-    Route::middleware(['check.role:admin,gerente'])->group(function () {
-        Route::resource('/produtos', ProdutoController::class);
-        Route::resource('/categorias', CategoriaController::class);
-        Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios');
-    });
-    
-    // Todos os roles administrativos
-    Route::resource('/pedidos', PedidoController::class);
-    Route::resource('/clientes', ClienteController::class);
-    
-    // Apenas Admin
-    Route::middleware(['check.role:admin'])->group(function () {
-        Route::resource('/funcionarios', FuncionarioController::class);
-        Route::resource('/cupons', CupomController::class);
-    });
-});
-```
-
-## **4.4. Componentes Livewire**
-
-### **4.4.1. Arquitetura dos Componentes**
-
-**Estrutura de Componentes por Módulo:**
-
-```
-App\Livewire\
-├── Public\
-│   ├── HomePage.php           # Página inicial
-│   ├── ProdutosGrid.php       # Grid de produtos
-│   ├── ProdutoShow.php        # Detalhe do produto
-│   └── CategoriaShow.php      # Página de categoria
-├── Carrinho\
-│   ├── CarrinhoItens.php      # Itens do carrinho
-│   ├── AdicionarAoCarrinho.php # Botão add to cart
-│   └── CarrinhoResumo.php     # Resumo do carrinho
-├── Checkout\
-│   ├── CheckoutForm.php       # Formulário de checkout
-│   ├── MetodoPagamento.php    # Seleção de pagamento
-│   └── ResumoPedido.php       # Resumo do pedido
-├── Cliente\
-│   ├── DashboardCliente.php   # Dashboard do cliente
-│   ├── MeusPedidos.php        # Lista de pedidos
-│   └── PerfilCliente.php      # Perfil do cliente
-└── Admin\
-    ├── DashboardAdmin.php     # Dashboard administrativo
-    ├── Produtos\              # Módulo de produtos
-    ├── Pedidos\               # Módulo de pedidos
-    └── Relatorios\            # Módulo de relatórios
-```
-
-### **4.4.2. Exemplo de Componente Otimizado**
-
-**ProdutoShow Component:**
-```php
-<?php
-
-namespace App\Livewire\Public;
-
-use Livewire\Component;
-use App\Models\Produto;
-
-class ProdutoShow extends Component
+// Exemplo de componente Livewire
+class ProductCard extends Component
 {
-    public $produto;
-    public $quantidade = 1;
-    public $variacaoSelecionada;
+    public $product;
+    public $inCart = false;
     
-    public function mount($slug)
+    public function addToCart()
     {
-        // Carregamento otimizado com apenas os dados necessários
-        $this->produto = Produto::with(['categoria', 'imagens'])
-            ->where('slug', $slug)
-            ->where('ativo', true)
-            ->firstOrFail();
-    }
-    
-    public function adicionarAoCarrinho()
-    {
-        // Validação de estoque
-        if ($this->produto->estoque < $this->quantidade) {
-            $this->dispatch('notificar', [
-                'tipo' => 'erro',
-                'mensagem' => 'Quantidade indisponível em estoque'
-            ]);
-            return;
-        }
-        
-        // Adicionar ao carrinho via session
-        $carrinho = session()->get('carrinho', []);
-        
-        $carrinho[$this->produto->id_produto] = [
-            'id' => $this->produto->id_produto,
-            'nome' => $this->produto->nome,
-            'preco' => $this->produto->preco_promocional ?? $this->produto->preco_base,
-            'quantidade' => $this->quantidade,
-            'imagem' => $this->produto->imagem_principal_url
-        ];
-        
-        session()->put('carrinho', $carrinho);
-        
-        $this->dispatch('carrinho-atualizado');
-        $this->dispatch('notificar', [
-            'tipo' => 'sucesso',
-            'mensagem' => 'Produto adicionado ao carrinho!'
-        ]);
+        // Lógica para adicionar ao carrinho
+        $this->inCart = true;
+        $this->emit('cartUpdated');
     }
     
     public function render()
     {
-        return view('livewire.public.produto-show')
-            ->layout('layouts.public');
+        return view('livewire.product-card');
     }
 }
 ```
 
-## **4.5. Otimizações para o Contexto Angolano**
+### **4.4.3. Suporte a Dark/Light Mode**
+Implementado via:
+1. **Tailwind CSS:** Classes `dark:` para estilos específicos
+2. **Alpine.js:** Alternância dinâmica com `x-data`
+3. **LocalStorage:** Persistência da preferência do usuário
 
-### **4.5.1. Performance para Baixa Conectividade**
+```javascript
+// Toggle de tema com Alpine.js
+<div x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
+     x-init="$watch('darkMode', val => {
+         localStorage.setItem('darkMode', val);
+         document.documentElement.classList.toggle('dark', val);
+     })"
+     :class="{ 'dark': darkMode }">
+</div>
+```
 
-**Cache Estratégico:**
+## **4.5. Estrutura de Diretórios do Projeto**
+
+```
+b2cstore/
+├── app/
+│   ├── Console/
+│   ├── Exceptions/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/
+│   │   │   ├── Auth/
+│   │   │   ├── CartController.php
+│   │   │   ├── CheckoutController.php
+│   │   │   └── ProductController.php
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Livewire/
+│   │   ├── CartCounter.php
+│   │   ├── ProductFilter.php
+│   │   └── ThemeToggle.php
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Product.php
+│   │   ├── Order.php
+│   │   └── Cart.php
+│   ├── Providers/
+│   ├── Services/
+│   │   ├── CartService.php
+│   │   ├── PaymentService.php
+│   │   └── ShippingService.php
+│   └── View/
+│       └── Components/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── factories/
+├── public/
+├── resources/
+│   ├── css/
+│   ├── js/
+│   └── views/
+│       ├── layouts/
+│       ├── admin/
+│       ├── auth/
+│       ├── cart/
+│       ├── checkout/
+│       └── products/
+├── routes/
+│   ├── web.php
+│   ├── admin.php
+│   └── api.php
+├── storage/
+├── tests/
+├── vendor/
+├── .env
+├── composer.json
+└── package.json
+```
+
+## **4.6. Modelo de Dados (Baseado em `modelo_de_dados.md`)**
+
+### **4.6.1. Principais Entidades e Relacionamentos**
+
 ```php
-// app/Http/Middleware/CacheStaticAssets.php
-public function handle($request, $next)
+// Exemplo de Modelo Eloquent
+class Product extends Model
 {
-    $response = $next($request);
+    protected $primaryKey = 'id_produto';
     
-    // Cache de assets estáticos por 1 ano
-    if ($request->is('assets/*') || $request->is('images/*')) {
-        return $response->header('Cache-Control', 'public, max-age=31536000');
-    }
-    
-    // Cache de páginas públicas por 5 minutos
-    if ($request->is('/') || $request->is('produtos') || $request->is('categoria/*')) {
-        return $response->header('Cache-Control', 'public, max-age=300');
-    }
-    
-    return $response;
-}
-```
-
-**Lazy Loading de Imagens:**
-```blade
-{{-- resources/views/components/imagem-otimizada.blade.php --}}
-@props(['src', 'alt', 'lazy' => true, 'width' => null, 'height' => null])
-
-@php
-    $classes = $attributes->get('class', '');
-    $isLazy = $lazy && !request()->has('nocache');
-@endphp
-
-<img 
-    {{ $attributes->merge(['class' => $classes]) }}
-    @if($isLazy)
-        src="{{ asset('images/placeholder.jpg') }}"
-        data-src="{{ $src }}"
-        loading="lazy"
-    @else
-        src="{{ $src }}"
-    @endif
-    alt="{{ $alt }}"
-    @if($width) width="{{ $width }}" @endif
-    @if($height) height="{{ $height }}" @endif
-    onerror="this.src='{{ asset('images/placeholder-error.jpg') }}'"
->
-```
-
-### **4.5.2. Localização para Angola**
-
-**Middleware de Localização:**
-```php
-<?php
-
-namespace App\Http\Middleware;
-
-use Closure;
-use Illuminate\Support\Facades\App;
-
-class AngolaLocale
-{
-    public function handle($request, Closure $next)
+    public function category()
     {
-        // Definir locale baseado em preferência do usuário ou geolocalização
-        $locale = $this->determinarLocale($request);
-        
-        App::setLocale($locale);
-        
-        // Definir moeda padrão como Kwanza
-        config(['app.currency' => 'AOA']);
-        config(['app.currency_symbol' => 'Kz']);
-        
-        // Definir fuso horário de Angola
-        config(['app.timezone' => 'Africa/Luanda']);
-        
-        return $next($request);
+        return $this->belongsTo(Category::class, 'id_categoria');
     }
     
-    private function determinarLocale($request)
+    public function images()
     {
-        // 1. Verificar preferência do usuário logado
-        if (auth()->check() && auth()->user()->preferencia_idioma) {
-            return auth()->user()->preferencia_idioma;
-        }
-        
-        // 2. Verificar parâmetro na URL
-        if ($request->has('lang')) {
-            $lang = $request->get('lang');
-            if (in_array($lang, ['pt', 'pt-ao', 'kmb'])) {
-                session()->put('locale', $lang);
-                return $lang;
-            }
-        }
-        
-        // 3. Verificar sessão
-        if (session()->has('locale')) {
-            return session('locale');
-        }
-        
-        // 4. Default: Português angolano
-        return 'pt-ao';
+        return $this->hasMany(ProductImage::class, 'id_produto');
+    }
+    
+    public function carts()
+    {
+        return $this->belongsToMany(Cart::class, 'carrinho_itens', 
+                   'id_produto', 'id_carrinho')
+                   ->withPivot('quantidade', 'preco_unitario');
     }
 }
 ```
 
-## **4.6. Sistema de Permissões**
+### **4.6.2. Migrations e Seeders**
+- **Migrations:** Definem estrutura do banco de dados
+- **Seeders:** Populam dados de teste (produtos, usuários, categorias)
+- **Factories:** Geram dados fictícios para testes
 
-### **4.6.1. Middleware de Verificação de Roles**
-
-```php
-<?php
-
-namespace App\Http\Middleware;
-
-use Closure;
-use Illuminate\Http\Request;
-
-class CheckRole
-{
-    public function handle(Request $request, Closure $next, ...$roles)
-    {
-        $user = auth()->user();
-        
-        if (!$user) {
-            return redirect()->route('login');
-        }
-        
-        // Admin tem acesso total
-        if ($user->role === 'admin') {
-            return $next($request);
-        }
-        
-        // Verificar se usuário tem uma das roles permitidas
-        if (in_array($user->role, $roles)) {
-            return $next($request);
-        }
-        
-        // Redirecionar para página não autorizada
-        return redirect()->route('unauthorized')
-            ->with('error', 'Você não tem permissão para acessar esta página.');
-    }
-}
-```
-
-### **4.6.2. Configuração das Permissões por Role**
-
-**Roles e Permissões:**
-```php
-// config/permissions.php
-return [
-    'roles' => [
-        'admin' => [
-            'name' => 'Administrador',
-            'permissions' => ['*'],
-            'menu' => ['dashboard', 'produtos', 'categorias', 'pedidos', 'clientes', 'relatorios', 'funcionarios', 'cupons']
-        ],
-        'gerente' => [
-            'name' => 'Gerente',
-            'permissions' => ['produtos.*', 'categorias.*', 'pedidos.*', 'clientes.*', 'relatorios.*'],
-            'menu' => ['dashboard', 'produtos', 'categorias', 'pedidos', 'clientes', 'relatorios']
-        ],
-        'operador' => [
-            'name' => 'Operador',
-            'permissions' => ['pedidos.view', 'pedidos.update', 'clientes.view'],
-            'menu' => ['pedidos', 'clientes']
-        ],
-        'suporte' => [
-            'name' => 'Suporte',
-            'permissions' => ['pedidos.view', 'clientes.view'],
-            'menu' => ['pedidos', 'clientes']
-        ],
-        'cliente' => [
-            'name' => 'Cliente',
-            'permissions' => ['pedidos.own', 'perfil.own'],
-            'menu' => ['dashboard', 'pedidos', 'perfil']
-        ]
-    ]
-];
-```
-
-## **4.7. Sistema de Cache Otimizado**
-
-### **4.7.1. Estratégia de Cache por Camada**
-
-**Cache em Memória (Redis):**
-```php
-// config/cache.php - Configuração para Angola
-'redis' => [
-    'client' => env('REDIS_CLIENT', 'predis'),
-    
-    'default' => [
-        'host' => env('REDIS_HOST', '127.0.0.1'),
-        'password' => env('REDIS_PASSWORD'),
-        'port' => env('REDIS_PORT', 6379),
-        'database' => env('REDIS_DB', 0),
-        'persistent' => true, // Conexão persistente para performance
-    ],
-    
-    'cache' => [
-        'host' => env('REDIS_HOST', '127.0.0.1'),
-        'password' => env('REDIS_PASSWORD'),
-        'port' => env('REDIS_PORT', 6379),
-        'database' => env('REDIS_CACHE_DB', 1),
-    ],
-],
-```
-
-**Cache de Views:**
 ```bash
-# Otimização para produção
-php artisan view:cache
-php artisan route:cache
+# Comandos para setup do banco
+php artisan migrate
+php artisan db:seed
+php artisan storage:link
+```
+
+## **4.7. Segurança e Performance**
+
+### **4.7.1. Medidas de Segurança**
+1. **CSRF Protection:** Tokens em todos os formulários
+2. **SQL Injection Prevention:** Eloquent ORM com parameter binding
+3. **XSS Protection:** Blade templating escapa automaticamente
+4. **Authentication:** Laravel Sanctum/Breeze para autenticação segura
+5. **Authorization:** Gates e Policies para controle de acesso baseado em roles
+6. **Input Validation:** Form Requests do Laravel
+
+### **4.7.2. Otimizações de Performance**
+1. **Eager Loading:** Prevenção de N+1 queries
+2. **Cache:** Redis para queries frequentes
+3. **Queue:** Processamento assíncrono de emails, imagens
+4. **Lazy Loading:** Imagens carregadas sob demanda
+5. **Pagination:** Limitação de resultados por página
+
+## **4.8. Testes e Qualidade**
+
+### **4.8.1. Estratégia de Testes**
+- **Unit Tests:** PHPUnit para testar models, services
+- **Feature Tests:** Testes de endpoints e fluxos completos
+- **Browser Tests:** Laravel Dusk para testes de UI
+- **Performance Tests:** Testes de carga com ferramentas externas
+
+### **4.8.2. Integração Contínua (CI)**
+Configuração básica com GitHub Actions:
+
+```yaml
+# .github/workflows/tests.yml
+name: Tests
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Install Dependencies
+        run: composer install
+      - name: Run Tests
+        run: vendor/bin/phpunit
+```
+
+## **4.9. Implantação e DevOps**
+
+### **4.9.1. Ambiente de Produção**
+- **Servidor:** Ubuntu 22.04 LTS
+- **Web Server:** Nginx + PHP-FPM
+- **Database:** MySQL 8.0 com replicação
+- **Cache:** Redis
+- **Queue:** Supervisor para gerenciar workers
+
+### **4.9.2. Deployment Process**
+```bash
+# Script de deploy simplificado
+git pull origin main
+composer install --no-dev
+npm install && npm run build
+php artisan migrate --force
 php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+sudo systemctl restart php8.2-fpm
 ```
 
-## **4.8. Monitoramento e Manutenção**
+## **4.10. Métricas Técnicas (SRE)**
 
-### **4.8.1. Health Checks**
-
-```php
-// routes/health.php
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'healthy',
-        'timestamp' => now()->toISOString(),
-        'services' => [
-            'database' => DB::connection()->getPdo() ? 'connected' : 'disconnected',
-            'cache' => Cache::get('health_check') === 'ok' ? 'working' : 'failing',
-            'storage' => Storage::disk('local')->exists('health.txt') ? 'writable' : 'readonly',
-        ]
-    ]);
-});
-
-Route::get('/metrics', function () {
-    // Métricas básicas para monitoramento
-    return response()->json([
-        'memory_usage' => memory_get_usage(true) / 1024 / 1024 . ' MB',
-        'active_users' => Cache::get('active_users', 0),
-        'pending_orders' => \App\Models\Pedido::where('status', 'pendente')->count(),
-        'system_load' => sys_getloadavg()[0] ?? 0,
-    ]);
-});
-```
-
-### **4.8.2. Logs para Angola**
-
-```php
-// config/logging.php - Configuração adaptada
-'channels' => [
-    'stack' => [
-        'driver' => 'stack',
-        'channels' => ['daily', 'slack_errors'],
-        'ignore_exceptions' => false,
-    ],
-    
-    'daily' => [
-        'driver' => 'daily',
-        'path' => storage_path('logs/laravel.log'),
-        'level' => env('LOG_LEVEL', 'debug'),
-        'days' => 14, // Manter logs por 2 semanas
-    ],
-    
-    'angola_specific' => [
-        'driver' => 'daily',
-        'path' => storage_path('logs/angola/transactions.log'),
-        'level' => 'info',
-        'days' => 30, // Logs de transações por 30 dias
-    ],
-],
-```
-
-## **4.9. Backup e Recovery**
-
-### **4.9.1. Estratégia de Backup**
-
-**Backup Diário:**
-```bash
-#!/bin/bash
-# backup-daily.sh
-DATE=$(date +%Y%m%d)
-BACKUP_DIR="/backups/b2cstore"
-
-# Backup do banco de dados
-mysqldump -u [user] -p[password] b2cstore > $BACKUP_DIR/db-$DATE.sql
-
-# Backup das imagens
-tar -czf $BACKUP_DIR/images-$DATE.tar.gz storage/app/public/products
-
-# Backup dos logs
-tar -czf $BACKUP_DIR/logs-$DATE.tar.gz storage/logs
-
-# Manter apenas últimos 7 backups
-find $BACKUP_DIR -type f -mtime +7 -delete
-```
-
-**Recovery Simples:**
-```php
-// app/Console/Commands/RestoreBackup.php
-public function handle()
-{
-    $this->info('Restaurando backup do B2CStore...');
-    
-    // Restaurar banco de dados
-    Artisan::call('db:wipe');
-    $backupFile = $this->argument('file');
-    DB::unprepared(file_get_contents($backupFile));
-    
-    // Restaurar imagens
-    Artisan::call('storage:link');
-    
-    $this->info('Backup restaurado com sucesso!');
-}
-```
-
-## **Referências**
-
-Laravel Documentation. (2023). *Laravel 10.x - Full-Stack Framework*. Laravel LLC.
-
-Tailwind CSS. (2023). *Utility-First CSS Framework*. Tailwind Labs.
-
-Alpine.js. (2023). *Minimal Framework for Composing JavaScript Behavior*. Alpine.js Collective.
-
-Livewire. (2023). *Full-Stack Framework for Laravel*. Caleb Porzio.
-
----
-
-*Próxima parte: "5. Implementação e Desenvolvimento por Fases"*
+| **Métrica**          | **Alvo**       | **Monitoramento**                  |
+|----------------------|----------------|------------------------------------|
+| **Uptime**           | 99.5%          | Uptime Robot                       |
+| **Response Time**    | < 200ms        | New Relic / Laravel Telescope      |
+| **Error Rate**       | < 0.1%         | Bugsnag / Sentry                   |
+| **DB Connections**   | < 80% uso      | MySQL Monitoring                   |
+| **Storage Growth**   | Alerta > 80%   | Server Monitoring                  |

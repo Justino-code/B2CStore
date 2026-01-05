@@ -1,268 +1,95 @@
-# **2. Análise de Negócio do Projeto B2CStore Angola**
+# **2. ANÁLISE DE NEGÓCIO**
 
-## **2.1. Análise do Mercado B2C em Angola**
+## **2.1. Contexto do Negócio**
+O **B2CStore** posiciona-se como uma solução de e-commerce **Business-to-Consumer (B2C)**, onde a empresa atua como vendedor direto ao consumidor final. Este modelo é particularmente relevante no contexto angolano, onde pequenos e médios comerciantes buscam expandir suas operações para o digital, mas enfrentam barreiras técnicas e financeiras para desenvolver plataformas robustas.
 
-### **2.1.1. Tamanho e Potencial do Mercado**
-
-O mercado de e-commerce em Angola tem apresentado crescimento consistente. Segundo dados da Associação Angolana de E-commerce (2023), o volume de transações online atingiu 150 milhões de USD em 2022, com projeção de crescimento para 250 milhões de USD até 2025. A distribuição por categoria de produtos mostra:
-
-**Distribuição do Mercado (2023):**
-- Eletrônicos e eletrodomésticos: 35%
-- Moda e acessórios: 25%
-- Supermercado e alimentos: 20%
-- Móveis e decoração: 15%
-- Outros: 5%
-
-### **2.1.2. Segmentação do Mercado Consumidor**
-
-**Segmento A - Jovens Urbanos Digitais (40%):**
-- Idade: 18-35 anos
-- Localização: Luanda, Benguela, Lubango
-- Renda mensal: 50.000 - 150.000 Kz
-- Comportamento: Alta frequência de compras online
-- Dispositivo principal: Smartphone Android
-
-**Segmento B - Profissionais Urbanos (35%):**
-- Idade: 30-50 anos
-- Localização: Principais centros urbanos
-- Renda mensal: 150.000 - 500.000 Kz
-- Comportamento: Compra por conveniência e qualidade
-- Dispositivo: Smartphone e laptop
-
-**Segmento C - Consumidores Emergentes (25%):**
-- Idade: 25-45 anos
-- Localização: Periferias urbanas
-- Renda mensal: 25.000 - 80.000 Kz
-- Comportamento: Primeiras experiências com e-commerce
-- Dispositivo: Smartphone básico
-
-### **2.1.3. Comportamento do Consumidor Angolano**
-
-Pesquisa de campo realizada em março de 2024 revelou:
-
-**Fatores de Decisão de Compra:**
-1. **Preço (45%):** Principal fator de decisão
-2. **Confiança no vendedor (30%):** Relevância da reputação
-3. **Métodos de pagamento (15%):** Flexibilidade nas opções
-4. **Prazo de entrega (10%):** Entrega dentro de 7 dias
-
-**Barreiras à Adoção:**
-- Falta de confiança nas transações online: 68%
-- Preocupação com segurança de dados: 52%
-- Dificuldade com processos de devolução: 45%
-- Limitações na entrega: 40%
+O sistema é projetado para ser **white-label**, ou seja, pode ser configurado para diferentes nichos de mercado (moda, eletrônicos, supermercado, etc.), oferecendo flexibilidade para adaptação a diversos segmentos do mercado angolano.
 
 ## **2.2. Modelo de Negócio**
+| **Componente**            | **Descrição**                                                                 |
+|---------------------------|------------------------------------------------------------------------------|
+| **Tipo de Receita**       | Venda direta de produtos físicos/digitais                                    |
+| **Canais de Venda**       | Website responsivo, potencial integração com marketplaces locais             |
+| **Relacionamento**        | Self-service (autoatendimento), suporte via chat/email, fidelização (cupons) |
+| **Segmentos de Clientes** | Consumidores finais angolanos com acesso à internet e disposição para compras online |
+| **Recursos Principais**   | Plataforma tecnológica, catálogo de produtos, sistema de pagamento simulado  |
+| **Atividades-Chave**      | Desenvolvimento, manutenção da plataforma, gestão de catálogo e pedidos     |
+| **Parcerias**             | Gateway de pagamento (futuro), serviços de logística, fornecedores          |
+| **Estrutura de Custos**   | Hospedagem, domínio, manutenção, marketing digital                          |
 
-### **2.2.1. Estrutura B2C Adaptada**
+## **2.3. Proposta de Valor**
+O B2CStore oferece aos seus usuários (consumidores) e administradores (lojistas) os seguintes valores:
 
-O B2CStore implementa um modelo híbrido que combina características do B2C tradicional com adaptações para o mercado angolano:
+### **Para o Consumidor:**
+- **Conveniência:** Compras 24/7 de qualquer dispositivo com internet
+- **Variedade:** Catálogo organizado por categorias com múltiplos filtros
+- **Transparência:** Preços claros, detalhes completos dos produtos e status de pedido em tempo real
+- **Experiência Personalizada:** Área do cliente com histórico, favoritos e recomendações
+- **Flexibilidade Visual:** Modo claro e escuro conforme preferência do usuário
 
+### **Para o Lojista/Administrador:**
+- **Controle Total:** Painel administrativo completo para gestão de produtos, pedidos, estoque e usuários
+- **Baixa Barreira de Entrada:** Solução pronta, sem necessidade de grande investimento em desenvolvimento
+- **Escalabilidade:** Arquitetura preparada para crescimento no número de produtos e transações
+- **Insights:** Relatórios básicos de vendas e desempenho de produtos
+- **Segurança:** Sistema com autenticação, validação de dados e proteção contra vulnerabilidades comuns
+
+## **2.4. Processos de Negócio Mapeados**
+
+### **Processo Principal: Venda Online**
 ```
-Empresa → Plataforma B2CStore → Consumidor Final
-    ↓              ↓                ↓
-Fornecedores   Tecnologia      Experiência
-Locais        Adaptada         Personalizada
-```
-
-### **2.2.2. Fontes de Receita**
-
-**Receita Principal - Comissão por Venda:**
-- Taxa de 5-10% sobre o valor da transação
-- Varia conforme categoria do produto
-- Isenção para primeiras 50 transações de novos vendedores
-
-**Receitas Secundárias:**
-1. **Publicidade Premium:** Destaque de produtos - 5.000 Kz/semana
-2. **Serviços de Logística:** Entrega premium - 2.000 Kz por entrega
-3. **Análise de Dados:** Relatórios personalizados - 15.000 Kz/mês
-4. **Treinamento Digital:** Capacitação de vendedores - 20.000 Kz/curso
-
-### **2.2.3. Estrutura de Custos**
-
-**Custos Fixos Mensais:**
-- Infraestrutura tecnológica: 200.000 Kz
-- Equipe técnica: 350.000 Kz
-- Marketing digital: 150.000 Kz
-- Operações administrativas: 100.000 Kz
-- **Total Custos Fixos:** 800.000 Kz/mês
-
-**Custos Variáveis (por transação):**
-- Processamento de pagamento: 2-3%
-- Suporte ao cliente: 500 Kz/transação
-- Manutenção da plataforma: 1%
-- **Custo Variável Médio:** 6% por transação
-
-## **2.3. Análise da Concorrência**
-
-### **2.3.1. Concorrentes Diretos**
-
-**Jumia Angola:**
-- **Market Share:** 40%
-- **Pontos Fortes:** Marca reconhecida, catálogo amplo
-- **Pontos Fracos:** Preços altos, suporte limitado
-- **Adaptação Local:** Média
-
-**Kijingo:**
-- **Market Share:** 15%
-- **Pontos Fortes:** Foco em produtos locais
-- **Pontos Fracos:** Tecnologia limitada
-- **Adaptação Local:** Alta
-
-**Outras Plataformas Locais:**
-- **Market Share Coletivo:** 20%
-- **Característica:** Especialização por nicho
-- **Limitação:** Escala limitada
-
-### **2.3.2. Diferenciação Competitiva do B2CStore**
-
-| **Fator Competitivo** | **B2CStore** | **Jumia** | **Kijingo** |
-|----------------------|--------------|-----------|-------------|
-| Pagamentos Locais | ★★★★★ | ★★★☆☆ | ★★★★☆ |
-| Suporte em Línguas Nacionais | ★★★★★ | ★★☆☆☆ | ★★★★☆ |
-| Otimização para Baixa Conectividade | ★★★★★ | ★★★☆☆ | ★★☆☆☆ |
-| Preços em Kwanza (sem conversão) | ★★★★★ | ★★☆☆☆ | ★★★★★ |
-| Logística Nacional | ★★★★☆ | ★★★☆☆ | ★★☆☆☆ |
-| Confiança Digital | ★★★★★ | ★★★★☆ | ★★★☆☆ |
-
-### **2.3.3. Vantagem Competitiva Sustentável**
-
-A vantagem competitiva do B2CStore baseia-se em três pilares:
-
-1. **Tecnologia Adaptada:** Sistema otimizado para as condições de infraestrutura angolana
-2. **Conhecimento Local:** Equipe com profundo entendimento do mercado angolano
-3. **Parcerias Estratégicas:** Alianças com operadores locais de pagamento e logística
-
-## **2.4. Proposta de Valor**
-
-### **2.4.1. Para Empresas Angolanas**
-
-**Redução de Barreiras à Entrada:**
-- Instalação simplificada: 24 horas para estar operacional
-- Custos iniciais reduzidos: 10.000 Kz para setup básico
-- Suporte técnico local: Disponível em horário comercial angolano
-
-**Ferramentas de Gestão:**
-- Dashboard intuitivo em Português
-- Relatórios adaptados à realidade fiscal angolana
-- Integração com sistemas contabilísticos locais
-
-### **2.4.2. Para Consumidores Angolanos**
-
-**Experiência de Compra Adaptada:**
-- Interface simples e intuitiva
-- Suporte a múltiplos métodos de pagamento locais
-- Informação clara sobre prazos e condições de entrega
-
-**Segurança e Confiança:**
-- Sistema de verificação de vendedores
-- Política de devolução adaptada ao contexto local
-- Suporte ao cliente via telefone, WhatsApp e email
-
-## **2.5. Estratégia de Marketing e Vendas**
-
-### **2.5.1. Estratégia de Aquisição**
-
-**Fase 1 - Lançamento (Primeiros 3 meses):**
-- Marketing digital focado em Luanda
-- Parcerias com influenciadores digitais angolanos
-- Programa de indicação com recompensas
-
-**Fase 2 - Expansão (Meses 4-12):**
-- Expansão para Benguela e Huambo
-- Campanhas em rádio local
-- Participação em feiras de negócios
-
-**Fase 3 - Consolidação (Ano 2):**
-- Expansão nacional para 8 províncias
-- Programas de fidelização
-- Parcerias com instituições financeiras
-
-### **2.5.2. Canais de Distribuição**
-
-**Canais Digitais (80%):**
-- Site responsivo mobile-first
-- Aplicativo Android nativo
-- Presença em redes sociais (Facebook, Instagram, WhatsApp)
-
-**Canais Físicos (20%):**
-- Pontos de venda em centros comerciais
-- Parcerias com lojas físicas existentes
-- Quiosques em áreas de grande circulação
-
-## **2.6. Projeções Financeiras**
-
-### **2.6.1. Projeção de Receitas (Primeiros 3 Anos)**
-
-| **Ano** | **Transações Mensais** | **Ticket Médio (Kz)** | **Receita Mensal (Kz)** | **Receita Anual (Kz)** |
-|---------|------------------------|-----------------------|-------------------------|------------------------|
-| 1       | 500                    | 25.000                | 1.250.000               | 15.000.000             |
-| 2       | 1.500                  | 28.000                | 4.200.000               | 50.400.000             |
-| 3       | 3.000                  | 30.000                | 9.000.000               | 108.000.000            |
-
-### **2.6.2. Ponto de Equilíbrio**
-
-**Cálculo do Ponto de Equilíbrio:**
-```
-Ponto de Equilíbrio = Custos Fixos / (1 - (Custos Variáveis/Receita))
-PE = 800.000 / (1 - 0.06)
-PE = 800.000 / 0.94
-PE = 851.064 Kz/mês
+Cliente navega → Seleciona produto → Adiciona ao carrinho → Finaliza compra (checkout) 
+→ Pagamento (simulado) → Confirmação → Processamento pelo administrador → Envio → Entrega
 ```
 
-**Transações Necessárias para Equilíbrio:**
-```
-851.064 / 25.000 = 34 transações/mês
-```
+### **Subprocessos Críticos:**
+1. **Gestão de Catálogo:** Adição/edição/remoção de produtos e categorias
+2. **Processamento de Pedidos:** Atualização de status (pendente → pago → enviado → entregado)
+3. **Gestão de Estoque:** Controle de disponibilidade e alertas de baixo estoque
+4. **Suporte ao Cliente:** Resolução de dúvidas, trocas e devoluções
 
-### **2.6.3. ROI Esperado**
+## **2.5. Regras de Negócio Identificadas**
 
-**Investimento Inicial:** 5.000.000 Kz
-**Retorno em 3 anos:** 108.000.000 Kz
-**ROI:** 2.060% em 3 anos
+1. **Estoque:** Não é possível comprar quantidade superior à disponível em estoque
+2. **Preços:** O preço promocional substitui o preço normal quando aplicável
+3. **Cupons:** Aplicáveis apenas se o pedido atingir valor mínimo e dentro do prazo de validade
+4. **Pedidos:** Apenas usuários autenticados podem finalizar compras
+5. **Pagamentos:** No MVP, pagamentos são simulados com confirmação manual pelo administrador
+6. **Frete:** Cálculo baseado em peso/dimensões (a ser implementado em fase posterior)
+7. **Reviews:** Apenas clientes que compraram o produto podem avaliá-lo
+8. **Níveis de Acesso:** Administradores, gerentes e suporte possuem permissões diferenciadas
 
-## **2.7. Riscos e Mitigação**
+## **2.6. Métricas de Sucesso (KPIs)**
 
-### **2.7.1. Riscos Identificados**
+| **KPI**                     | **Descrição**                                  | **Meta**                     |
+|-----------------------------|-----------------------------------------------|------------------------------|
+| Taxa de Conversão           | % de visitantes que realizam uma compra       | 2-3% (média e-commerce)     |
+| Ticket Médio                | Valor médio por pedido                        | A definir conforme nicho     |
+| Taxa de Abandono do Carrinho| % de carrinhos não finalizados                | < 70%                        |
+| Tempo de Processamento      | Tempo entre pedido e envio                    | < 24h                       |
+| Satisfação do Cliente       | Baseado em reviews e avaliações               | Média ≥ 4.0 (escala 1-5)    |
+| Disponibilidade do Sistema  | Uptime da plataforma                          | > 99.5%                      |
 
-**Risco 1 - Adoção Limitada pelo Consumidor**
-- **Probabilidade:** Alta
-- **Impacto:** Alto
-- **Mitigação:** Programa de educação digital, parcerias com instituições locais
+## **2.7. Riscos de Negócio Identificados**
 
-**Risco 2 - Instabilidade Cambial**
-- **Probabilidade:** Média
-- **Impacto:** Médio
-- **Mitigação:** Precificação em Kwanza, hedge cambial para transações internacionais
+| **Risco**                     | **Impacto** | **Probabilidade** | **Mitigação**                              |
+|-------------------------------|-------------|-------------------|--------------------------------------------|
+| Falha no sistema de pagamento | Alto        | Médio             | Implementação de fallback manual           |
+| Ataques cibernéticos          | Alto        | Médio             | Segurança reforçada, backups regulares     |
+| Competição de marketplaces    | Médio       | Alta              | Diferenciação por nicho e atendimento      |
+| Logística deficiente          | Alto        | Alta (em Angola)  | Parcerias com múltiplas transportadoras    |
+| Alterações regulatórias       | Médio       | Baixa             | Monitoramento contínuo do marco legal      |
+| Variação cambial              | Médio       | Alta              | Preços em Kwanza, revisão periódica        |
 
-**Risco 3 - Concorrência Agressiva**
-- **Probabilidade:** Alta
-- **Impacto:** Médio
-- **Mitigação:** Diferenciação por localização, parcerias exclusivas
+## **2.8. Considerações para o Mercado Angolano**
 
-**Risco 4 - Infraestrutura Tecnológica**
-- **Probabilidade:** Alta
-- **Impacto:** Alto
-- **Mitigação:** Sistema otimizado para baixa conectividade, servidores redundantes
+1. **Conectividade:** Design otimizado para baixa largura de banda (imagens comprimidas, lazy loading)
+2. **Pagamentos:** Preparado para integração com soluções locais (e.g., Multicaixa, Carteiras Digitais)
+3. **Logística:** Campos de endereço adaptados à realidade angolana (bairros, municípios, províncias)
+4. **Idioma:** Interface em português, com possibilidade de expansão para línguas nacionais
+5. **Confiança:** Sistema de reviews e selos de segurança para aumentar credibilidade
+6. **Mobile-first:** 68% dos angolanos acessam internet principalmente via smartphone (dados 2023)
 
-### **2.7.2. Plano de Contingência**
+---
 
-**Cenário Pessimista (25% abaixo das projeções):**
-- Redução de custos operacionais em 30%
-- Foco em mercados de nicho
-- Revisão do modelo de comissões
-
-**Cenário de Crise (50% abaixo das projeções):**
-- Pivô para modelo B2B2C
-- Redução da equipe técnica
-- Foco em sustentabilidade financeira
-
-## **Referências**
-
-Associação Angolana de E-commerce. (2023). *Relatório Anual do E-commerce em Angola*. Luanda: AAE.
-
-Garcia, M. (2023). *Análise de Mercado para Plataformas Digitais em Angola*. Revista de Economia Digital, 15(2), 45-62.
-
-Ministério da Economia e Planeamento. (2023). *Perspetivas Económicas de Angola 2023-2025*. Luanda: MEP.
-
-Santos, A. (2022). *Comportamento do Consumidor no Comércio Eletrónico Angolano*. Estudo de Mercado, Universidade Católica de Angola.
+**Próximo tema a ser desenvolvido: Estudo do Mercado (Angola)**  
