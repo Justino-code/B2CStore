@@ -171,10 +171,10 @@ class Carrinho extends Component
             // Verificar estoque
             $produto = Produto::find($item->id_produto);
             if ($quantidade > $produto->estoque) {
-                $this->dispatch('notificar', [
-                    'tipo' => 'erro',
-                    'mensagem' => 'Quantidade indisponível em estoque.'
-                ]);
+                $this->dispatch('notify',
+                    type: 'error',
+                    message: 'Quantidade indisponível em estoque.'
+                );
                 return;
             }
 
@@ -182,10 +182,10 @@ class Carrinho extends Component
             $item->save();
             $this->carregarCarrinho();
             
-            $this->dispatch('notificar', [
-                'tipo' => 'sucesso',
-                'mensagem' => 'Quantidade atualizada!'
-            ]);
+            $this->dispatch('notify',
+                type: 'success',
+                message: 'Quantidade atualizada!'
+            );
             
             $this->dispatch('carrinho-atualizado');
         }
@@ -199,10 +199,10 @@ class Carrinho extends Component
             $item->delete();
             $this->carregarCarrinho();
             
-            $this->dispatch('notificar', [
-                'tipo' => 'sucesso',
-                'mensagem' => '"' . $nomeProduto . '" removido do carrinho!'
-            ]);
+            $this->dispatch('notify',
+                type: 'success',
+                message: '"' . $nomeProduto . '" removido do carrinho!'
+            );
             
             $this->dispatch('carrinho-atualizado');
         }
@@ -227,20 +227,20 @@ class Carrinho extends Component
             // Verificar se já foi usado pelo usuário
             if ($cupom->limite_usos && $cupom->usos >= $cupom->limite_usos) {
                 $this->erroCupom = 'Este cupom atingiu o limite de usos.';
-                $this->dispatch('notificar', [
-                    'tipo' => 'erro',
-                    'mensagem' => $this->erroCupom
-                ]);
+                $this->dispatch('notify',
+                    type: 'error',
+                    message: $this->erroCupom
+                );
                 return;
             }
             
             // Verificar valor mínimo
             if ($cupom->valor_minimo && $this->subtotal < $cupom->valor_minimo) {
                 $this->erroCupom = 'Valor mínimo para usar este cupom: ' . format_kwanza($cupom->valor_minimo);
-                $this->dispatch('notificar', [
-                    'tipo' => 'erro',
-                    'mensagem' => $this->erroCupom
-                ]);
+                $this->dispatch('notify',
+                    type: 'error',
+                    message:  $this->erroCupom
+                );
                 return;
             }
             
@@ -259,16 +259,16 @@ class Carrinho extends Component
             
             $this->calcularTotais();
             
-            $this->dispatch('notificar', [
-                'tipo' => 'sucesso',
-                'mensagem' => 'Cupom aplicado com sucesso!'
-            ]);
+            $this->dispatch('notify',
+                type: 'success',
+                message: 'Cupom aplicado com success!'
+            );
         } else {
             $this->erroCupom = 'Cupom inválido ou expirado.';
-            $this->dispatch('notificar', [
-                'tipo' => 'erro',
-                'mensagem' => $this->erroCupom
-            ]);
+            $this->dispatch('notify',
+                type: 'error',
+                message: $this->erroCupom
+            );
         }
     }
 
@@ -284,10 +284,10 @@ class Carrinho extends Component
         
         $this->calcularTotais();
         
-        $this->dispatch('notificar', [
-            'tipo' => 'info',
-            'mensagem' => 'Cupom removido.'
-        ]);
+        $this->dispatch('notify',
+            type: 'info',
+            message: 'Cupom removido.'
+        );
     }
 
     public function calcularFrete()
@@ -312,10 +312,10 @@ class Carrinho extends Component
         $this->carrinho->update(['frete' => $this->frete]);
         $this->calcularTotais();
         
-        $this->dispatch('notificar', [
-            'tipo' => 'sucesso',
-            'mensagem' => 'Frete calculado com sucesso!'
-        ]);
+        $this->dispatch('notify', 
+            type: 'success',
+            message: 'Frete calculado com success!'
+        );
     }
 
     public function limparCarrinho()
@@ -334,10 +334,10 @@ class Carrinho extends Component
             
             $this->carregarCarrinho();
             
-            $this->dispatch('notificar', [
-                'tipo' => 'info',
-                'mensagem' => 'Carrinho limpo com sucesso!'
-            ]);
+            $this->dispatch('notify',
+                type: 'info',
+                message: 'Carrinho limpo com success!'
+            );
         }
     }
 
@@ -345,20 +345,20 @@ class Carrinho extends Component
     {
         // Verificar se há itens no carrinho
         if ($this->itens->isEmpty()) {
-            $this->dispatch('notificar', [
-                'tipo' => 'erro',
-                'mensagem' => 'Seu carrinho está vazio!'
-            ]);
+            $this->dispatch('notify',
+                type: 'error',
+                message: 'Seu carrinho está vazio!'
+            );
             return;
         }
 
         // Verificar estoque de todos os itens
         foreach ($this->itens as $item) {
             if ($item->quantidade > $item->produto->estoque) {
-                $this->dispatch('notificar', [
-                    'tipo' => 'erro',
-                    'mensagem' => 'O produto "' . $item->produto->nome . '" não tem estoque suficiente.'
-                ]);
+                $this->dispatch('notify',
+                    type: 'error',
+                    message: 'O produto "' . $item->produto->nome . '" não tem estoque suficiente.'
+                );
                 return;
             }
         }
@@ -409,10 +409,10 @@ class Carrinho extends Component
         
         $this->mostrarModalEndereco = false;
         
-        $this->dispatch('notificar', [
-            'tipo' => 'sucesso',
-            'mensagem' => 'Endereço cadastrado com sucesso!'
-        ]);
+        $this->dispatch('notify',
+            type: 'success',
+            message: 'Endereço cadastrado com success!'
+        );
         
         // Após salvar o endereço, redirecionar para checkout
         return redirect()->route('cliente.checkout');
@@ -420,7 +420,7 @@ class Carrinho extends Component
 
     public function continuarComprando()
     {
-        return redirect()->route('loja');
+        return redirect()->route('home');
     }
 
     public function render()
